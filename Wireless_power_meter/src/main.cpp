@@ -31,9 +31,9 @@ void setup() {
     NVSSTORAGE::NVS_read(); // 读取nvs存储
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
     // 创建任务
-    xTaskCreate(BUTTON::button_task, "button_task", 2048, NULL, 5, NULL); // 按键任务
+    xTaskCreate(BUTTON::button_task, "button_task", 512, NULL, 5, NULL); // 按键任务
     xTaskCreate(POWERMETER::updatePower, "updatePower", 2048, NULL, 5, NULL);// 电压电流更新任务
-    xTaskCreate(SCREEN::updatescreen, "updatescreen", 2048, NULL, 5, NULL);// 屏幕更新任务
+    xTaskCreate(SCREEN::updatescreen, "updatescreen", 8192, NULL, 5, NULL);// 屏幕更新任务
     
 }
 

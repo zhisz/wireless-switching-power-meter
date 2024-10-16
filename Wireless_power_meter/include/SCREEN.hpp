@@ -190,6 +190,12 @@ namespace SCREEN {
     static uint8_t current_curve_point[190];
     // 曲线页面
     void curve_page() {
+        // 曲线低点高度
+        const float curve_mini_height=0.1;//0-1
+        // 曲线高点高度
+        const float curve_maxi_height=0.8;//0-1
+
+
         auto background = []() {
             for(int i=50;i<240;i+=10){
                 clk.drawLine(i, 0, i, 135, 0x3333);
@@ -208,15 +214,15 @@ namespace SCREEN {
         clk.print("MAX->\n");
         clk.setTextColor(TFT_RED);
         clk.setCursor(3, 12);
-        clk.print(POWERMETER::voltage_queue.max());
+        clk.print(POWERMETER::voltage_queue.get_max());
         clk.print("V\n");
         clk.setTextColor(TFT_GREEN);
         clk.setCursor(3, 24);
-        clk.print(POWERMETER::current_queue.max());
+        clk.print(POWERMETER::current_queue.get_max());
         clk.print("A\n");
         clk.setTextColor(TFT_BLUE);
         clk.setCursor(3, 36);
-        clk.print(POWERMETER::power_queue.max());
+        clk.print(POWERMETER::power_queue.get_max());
         clk.print("W\n");
 
         //MIN部分
@@ -227,15 +233,15 @@ namespace SCREEN {
         clk.print("MIN->\n");
         clk.setTextColor(TFT_RED);
         clk.setCursor(3, 70+12);
-        clk.print(POWERMETER::voltage_queue.min());
+        clk.print(POWERMETER::voltage_queue.get_min());
         clk.print("V\n");
         clk.setTextColor(TFT_GREEN);
         clk.setCursor(3, 70+24);
-        clk.print(POWERMETER::current_queue.min());
+        clk.print(POWERMETER::current_queue.get_min());
         clk.print("A\n");
         clk.setTextColor(TFT_BLUE);
         clk.setCursor(3, 70+36);
-        clk.print(POWERMETER::power_queue.min());
+        clk.print(POWERMETER::power_queue.get_min());
         clk.print("W\n");
 
 
@@ -243,20 +249,34 @@ namespace SCREEN {
         memset(power_curve_point,0,sizeof(power_curve_point));
         memset(voltage_curve_point,0,sizeof(voltage_curve_point));
         memset(current_curve_point,0,sizeof(current_curve_point));
+        
+        //曲线缩放
+        const float curve_scale=1/(curve_maxi_height-curve_mini_height);
         //保存为采样点
         for(int i=0;i<190;i++){
-            if(POWERMETER::power_queue.max()-POWERMETER::power_queue.min()!=0){
-                power_curve_point[i]=135*(POWERMETER::power_queue.toArray()[int(i*step)]-POWERMETER::power_queue.min())/2*(POWERMETER::power_queue.max()-POWERMETER::power_queue.min());
+            if(POWERMETER::power_queue.get_max()-POWERMETER::power_queue.get_min()!=0){
+                float mini_var=POWERMETER::power_queue.get_min();
+                float data_range=POWERMETER::MAX_CURRENT*POWERMETER::MAX_VOLTAGE-mini_var;
+                power_curve_point[i]=135*(POWERMETER::power_queue.toArray()[int(i*step)]-mini_var)/(curve_scale*data_range);
             }
 
-            if(POWERMETER::voltage_queue.max()-POWERMETER::voltage_queue.min()!=0){
-                voltage_curve_point[i]=135*(POWERMETER::voltage_queue.toArray()[int(i*step)]-POWERMETER::voltage_queue.min())/2*(POWERMETER::voltage_queue.max()-POWERMETER::voltage_queue.min());
+            if(POWERMETER::voltage_queue.get_max()-POWERMETER::voltage_queue.get_min()!=0){
+                float mini_var=POWERMETER::voltage_queue.get_min();
+                float data_range = POWERMETER::MAX_VOLTAGE-mini_var;
+                voltage_curve_point[i]=135*(POWERMETER::voltage_queue.toArray()[int(i*step)]-mini_var)/(curve_scale*data_range);
             }
-            if(POWERMETER::current_queue.max()-POWERMETER::current_queue.min()!=0){
-                current_curve_point[i]=135*(POWERMETER::current_queue.toArray()[int(i*step)]-POWERMETER::current_queue.min())/2*(POWERMETER::current_queue.max()-POWERMETER::current_queue.min());
+            if(POWERMETER::current_queue.get_max()-POWERMETER::current_queue.get_min()!=0){
+                float mini_var=POWERMETER::current_queue.get_min();
+                float data_range = POWERMETER::MAX_CURRENT-mini_var;
+                current_curve_point[i]=135*(POWERMETER::current_queue.toArray()[int(i*step)]-mini_var)/(curve_scale*data_range);
             }
         }
-        Serial.println(voltage_curve_point[0]);
+
+        for(int i=0;i<190;i++){
+            power_curve_point[i]+=curve_mini_height*135;
+            voltage_curve_point[i]+=curve_mini_height*135;
+            current_curve_point[i]+=curve_mini_height*135;
+        }
         //绘制曲线
         for(int i=239;i>50;i--){
             clk.drawLine(i, 133-power_curve_point[239-i], i-1, 133-power_curve_point[240-i], TFT_BLUE);

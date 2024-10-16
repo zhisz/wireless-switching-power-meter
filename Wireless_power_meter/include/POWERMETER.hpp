@@ -1,3 +1,9 @@
+/*
+ * @LastEditors: qingmeijiupiao
+ * @Description: 
+ * @Author: qingmeijiupiao
+ * @Date: 2024-10-13 17:18:42
+ */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
 #include "INA226.h"
@@ -5,7 +11,7 @@
 // 输入电压电流读取相关
 namespace POWERMETER {
     const int READ_HZ = 100;                  // 读取电压电流的频率
-    const int data_save_time=5;              // 保存数据的时间 秒
+    const int data_save_time=2;              // 保存数据的时间 秒
     INA226 PowerSensor(0x40);                 // 创建INA226传感器对象
     double voltage = 0;                       // 电压
     double current = 0;                       // 电流

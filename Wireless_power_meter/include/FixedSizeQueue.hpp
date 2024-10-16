@@ -1,3 +1,9 @@
+/*
+ * @LastEditors: qingmeijiupiao
+ * @Description: 
+ * @Author: qingmeijiupiao
+ * @Date: 2024-10-13 11:15:00
+ */
 #ifndef FixedSizeQueue_HPP
 #define FixedSizeQueue_HPP
 
@@ -14,10 +20,70 @@ public:
     FixedSizeQueue() : capacity(N) {}
 
     void push(const T& value) {
+        // 如果队列已满，将队首元素出队
         if (queue.size() == capacity) {
-            queue.pop(); // 移除最早的元素
+            T pop_value = queue.front();
+            queue.pop();// 出队
+           
+            //更新总值
+            total_value -= pop_value;
+
+            
+            if(max_index>=N){// 如果最大值已经出队，查找当前队列最大值
+                std::queue<T> copy = queue;//复制队列
+                T max=copy.front();//队首元素
+                int now_index=0;//当前索引
+                max_index=0;//队首元素为最大值情况
+                while (!copy.empty()) {//遍历队列
+                    T value = copy.front();
+                    copy.pop();
+                    if (value > max) {//更新最大值
+                        max = value;//更新最大值
+                        max_index = now_index;//更新最大值索引
+                        break;
+                    }
+                    now_index++;//更新索引
+                }
+            }
+            if(min_index>=N){// 如果最小值已经出队，查找当前队列最小值
+                std::queue<T> copy = queue;//复制队列
+                T min=copy.front();//队首元素
+                int now_index=0;//当前索引
+                min_index=0;//队首元素为最小值情况
+                while (!copy.empty()) {//遍历队列
+                    T value = copy.front();
+                    copy.pop();
+                    if (value < min) {//更新最小值
+                        min = value;//更新最小值
+                        min_index = now_index;//更新最小值索引
+                        break;
+                    }
+                    now_index++;//更新索引
+                }
+            }
+
         }
+        if(queue.empty()){
+            max=value;
+            min=value;
+            max_index=0;
+            min_index=0;
+        }
+        if(value>max){
+            max=value;
+            max_index=0;
+        }
+        if(value<min){
+            min=value;
+            min_index=0;
+        }
+
+        total_value += value;
+        average = total_value / queue.size();
         queue.push(value); // 添加新元素
+        max_index++;
+        min_index++;
+
     }
 
     bool isEmpty() const {
@@ -30,37 +96,15 @@ public:
     std::queue<T> copy(){
         return queue;
     }
-    T average() const {
-        T sum = 0;
-        for (const T& value : queue) {
-            sum += value;
-        }
-        return sum / queue.size();
+    T get_average() const {
+        return total_value / queue.size();
     }
 
-    T max() const {
-        std::queue<T> copy = queue;
-        T max;
-        while (!copy.empty()) {
-            T value = copy.front();
-            copy.pop();
-            if (value > max) {
-                max = value;
-            }
-        }
+    T get_max() const {
         return max;
     }
 
-    T min() const {
-        std::queue<T> copy = queue;
-        T min;
-        while (!copy.empty()) {
-            T value = copy.front();
-            copy.pop();
-            if (value < min) {
-                min = value;
-            }
-        }
+    T get_min() const {
         return min;
     }
     T* toArray(){
@@ -80,5 +124,12 @@ public:
     }
     private:
     T* array = new T[N];
+    T max;
+    int max_index;
+    T min;
+    int min_index;
+    T total_value;
+    T average;
+
 };
 #endif // FixedSizeQueue_HPP

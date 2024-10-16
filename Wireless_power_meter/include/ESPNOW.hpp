@@ -15,45 +15,46 @@
 #define secret_key 0xFEFE
 #define MAX_RETRY 5
 std::map<int,uint8_t*> receive_MACs;//接收MAC
-esp_now_peer_info_t peerInfo;
 bool is_conect = false;
 //数据包格式
 struct data_package {
   uint16_t header_code=secret_key;//数据包头,作为密钥使用
   uint8_t name_len;
+  uint8_t data_len;
   String package_name;
-  std::vector<uint8_t> data;
+  uint8_t data[256];
   void add_name(String _name){
     package_name=_name;
     name_len=package_name.length();
   }
   void add_data(uint8_t* _data,int _datalen){
+    data_len=_datalen;
     for(int i=0;i<_datalen;i++){
-      data.push_back(_data[i]);
+      data[i]=_data[i];
     }
+  }
+  void get_data(uint8_t* _data){
+    _data[0]=header_code/256;
+    _data[1]=header_code%256;
+    _data[2]=package_name.length();
+    _data[3]=data_len;
+    memcpy(_data+4,package_name.c_str(),package_name.length());
+    memcpy(_data+4+package_name.length(),data,data_len);
   }
   void decode(uint8_t* _data,int _datalen){
-    data.clear();
-    header_code=data[0]+data[1]*256;
-    name_len=data[2];
-    package_name=String((char*)data.data()+3,name_len);
-    for(int i=3+name_len;i<_datalen;i++){
-      data.push_back(data[i]);
-    }
-  }
-  void get_data(uint8_t* data_array){
-    data_array[0]=header_code/256;
-    data_array[1]=header_code%256;
-    data_array[2]=name_len;
+    header_code=_data[0]+_data[1]*256;
+    name_len=_data[2];
+    data_len=_data[3];
+    package_name="";
     for(int i=0;i<name_len;i++){
-      data_array[3+i]=package_name[i];
+      package_name+=char(_data[4+i]);
     }
-    for(int i=0;i<data.size();i++){
-      data_array[3+name_len+i]=data[i];
+    for(int i=0;i<data_len;i++){
+      data[i]=_data[4+name_len+i];
     }
   }
   int get_len(){
-    return 3+name_len+data.size();
+    return 4+name_len+data_len;
   }
 
 };
@@ -62,12 +63,12 @@ struct data_package {
 using callback_func =std::function<void(data_package)>;
 
 std::map<String, callback_func> callback_map;
-
 data_package re_data;
 
 TaskHandle_t  callback_task_handle=nullptr;
 void callback_task(void * pvParameters ){
   if(callback_map.count( re_data.package_name )!=0){
+    
     callback_map[re_data.package_name](re_data);
   }
   callback_task_handle=nullptr;
@@ -78,18 +79,20 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
   //检查是否是数据包
   if(len<2) return;
   if(*(uint16_t*)data!=secret_key) return;
+  re_data.decode((uint8_t*)data,len);
   if(callback_task_handle==nullptr){
     xTaskCreate(callback_task, "callback_task", 8192, NULL, 5, &callback_task_handle);
   }
   is_conect=true;
 }
 
-
-
 //广播地址
 uint8_t receive_MACAddress[] ={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+
+
 //ESP-NOW初始化
-void esp_now_setup() {
+esp_now_peer_info_t peerInfo;
+void esp_now_setup(uint8_t* receive_MAC) {
   
   WiFi.mode(WIFI_STA);
   if (esp_now_init() != ESP_OK) {
@@ -98,7 +101,7 @@ void esp_now_setup() {
   }
 
   peerInfo.ifidx = WIFI_IF_STA;
-  memcpy(peerInfo.peer_addr, receive_MACAddress, 6);
+  memcpy(peerInfo.peer_addr, receive_MAC, 6);
 
   if (esp_now_add_peer(&peerInfo) != ESP_OK){
       Serial.println("Failed to add peer");
