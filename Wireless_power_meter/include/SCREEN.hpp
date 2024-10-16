@@ -47,245 +47,321 @@ void sprintf_float(double value, char* buffer, int len) {
 namespace SCREEN {
     const int SCREEN_HZ = 60;                 // 屏幕刷新率
 
+    // 页面列表
+    std::list<std::function<void()>> page_list;                    // 页面列表
+    std::list<std::function<void()>>::iterator now_page = page_list.begin(); // 当前页面
+
+
     TFT_eSPI tft = TFT_eSPI();                // 创建屏幕对象
     TFT_eSprite clk = TFT_eSprite(&tft);      // 创建缓冲区
 
+    const uint16_t border_color = TFT_YELLOW;    //边框颜色
+
+
+    /*↓↓↓↓↓↓↓↓页面函数区域↓↓↓↓↓↓↓↓*/
     // 主页面绘制函数
     void mian_page() {
-        clk.setTextColor(TFT_WHITE);          // 设置文本颜色为白色
-        
+        const uint16_t default_color = TFT_WHITE; // 保存默认颜色
+        const uint16_t voltage_color = TFT_RED;   // 电压颜色
+        const uint16_t current_color = TFT_GREEN;  // 电流颜色
+        const uint16_t power_color = TFT_BLUE;    // 功率颜色
+        const uint16_t line_color = border_color; // 分割线颜色
+
+        clk.setTextColor(default_color); // 默认文本颜色
+
         // 电压部分
-        clk.setTextColor(TFT_RED);  
-        clk.setCursor(10, 10);
-        char buffer[4];
-        sprintf_float(POWERMETER::voltage, buffer, 3); // 格式化电压数据
-        clk.setTextFont(6);
-        clk.setTextSize(1);
-        clk.print(buffer);
-        clk.setTextFont(1);
-        clk.setTextSize(5);
-        clk.print("V");
+        auto draw_voltage = []() {
+            clk.setTextColor(voltage_color);  
+            clk.setCursor(10, 10);
+            char buffer[4];
+            sprintf_float(POWERMETER::voltage, buffer, 3); // 格式化电压数据
+            clk.setTextFont(6);
+            clk.setTextSize(1);
+            clk.print(buffer);
+            clk.setTextFont(1);
+            clk.setTextSize(5);
+            clk.print("V");
+        };draw_voltage(); // 调用电压绘制函数
 
         // 电流部分
-        clk.setTextColor(TFT_GREEN);  
-        sprintf_float(POWERMETER::current, buffer, 3); // 格式化电流数据
-        clk.setCursor(10, 60);
-        clk.setTextFont(6);
-        clk.setTextSize(1);
-        clk.print(buffer);
-        clk.setTextFont(1);
-        clk.setTextSize(5);
-        clk.print("A");
-        
+        auto draw_current = []() {
+            clk.setTextColor(current_color);  
+            char buffer[4];
+            sprintf_float(POWERMETER::current, buffer, 3); // 格式化电流数据
+            clk.setCursor(10, 60);
+            clk.setTextFont(6);
+            clk.setTextSize(1);
+            clk.print(buffer);
+            clk.setTextFont(1);
+            clk.setTextSize(5);
+            clk.print("A");
+        };draw_current(); // 调用电流绘制函数
+
         // 功率部分
-        clk.setTextColor(TFT_BLUE); 
-        sprintf_float(POWERMETER::voltage*POWERMETER::current, buffer, 3); // 格式化输出电量
-        clk.setCursor(10, 110);
-        clk.setTextFont(4);
-        clk.setTextSize(1);
-        clk.print(buffer);
-        clk.print("W");
+        auto draw_power = []() {
+            clk.setTextColor(power_color); 
+            char buffer[4];
+            sprintf_float(POWERMETER::voltage * POWERMETER::current, buffer, 3); // 格式化功率数据
+            clk.setCursor(10, 110);
+            clk.setTextFont(4);
+            clk.setTextSize(1);
+            clk.print(buffer);
+            clk.print("W");
+        };draw_power(); // 调用功率绘制函数
 
-        clk.setTextColor(TFT_WHITE); 
-       //当前开关状态部分“<——”
-        auto draw_arrow = []() {//lamda方便编辑器折叠
-            uint16_t color=power_output.getstate()?TFT_GREEN:TFT_RED;//设置颜色，关是红色，开是绿色
-            clk.drawLine(104, 120-1,120, 120-11, color);//画箭头上
-            clk.drawLine(104, 120,120, 120-10, color);
+        clk.setTextColor(default_color); 
+        // 当前开关状态部分“<——”
+        auto draw_arrow = []() {
+            uint16_t color = power_output.getstate() ? TFT_GREEN : TFT_RED; // 设置颜色，关是红色，开是绿色
+            clk.drawLine(104, 120 - 1, 120, 120 - 11, color); // 画箭头上
+            clk.drawLine(104, 120, 120, 120 - 10, color);
 
-            clk.drawLine(105, 119,150, 119, color);
-            clk.drawLine(105, 120,150, 120, color);//画箭头中心
-            clk.drawLine(105, 121,150, 121, color);
+            clk.drawLine(105, 119, 150, 119, color);
+            clk.drawLine(105, 120, 150, 120, color); // 画箭头中心
+            clk.drawLine(105, 121, 150, 121, color);
 
-            clk.drawLine(104, 120,120, 120+10, color);//画箭头下
-            clk.drawLine(104, 120+1,120, 120+11, color);
-            if(!power_output.getstate()){//如果是关的话
-                //画个X
-                clk.drawLine(135-10, 120+11,135+10, 120-11, color);
-                clk.drawLine(135-10, 120-11,135+10, 120+11, color);
+            clk.drawLine(104, 120, 120, 120 + 10, color); // 画箭头下
+            clk.drawLine(104, 120 + 1, 120, 120 + 11, color);
+            if (!power_output.getstate()) { // 如果是关的话
+                // 画个X
+                clk.drawLine(135 - 10, 120 + 11, 135 + 10, 120 - 11, color);
+                clk.drawLine(135 - 10, 120 - 11, 135 + 10, 120 + 11, color);
             }
-        };draw_arrow();
+        };draw_arrow(); // 调用箭头绘制函数
 
         // 绘制温度
-        clk.setCursor(170, 10);
-        clk.setTextFont(4);
-        clk.setTextSize(1);
-        clk.print(int(Temperature_sensor.getTemperature())); // 显示温度
-        clk.print("  C"); // 显示单位摄氏度
-        clk.drawCircle(203, 14, 3, TFT_WHITE); // 显示小圆圈作为摄氏度符号
+        auto draw_temperature = []() {
+            clk.setCursor(170, 10);
+            clk.setTextFont(4);
+            clk.setTextSize(1);
+            clk.print(int(Temperature_sensor.getTemperature())); // 显示温度
+            clk.print("  C"); // 显示单位摄氏度
+            clk.drawCircle(203, 14, 3, default_color); // 显示小圆圈作为摄氏度符号
+        };
+        draw_temperature(); // 调用温度绘制函数
 
         // 最大电压和电流显示
-        clk.setCursor(170, 30);
-        clk.print("MAX:");
-        clk.setCursor(170, 50);
-        clk.setTextColor(TFT_RED);
-        sprintf_float(POWERMETER::MAX_VOLTAGE, buffer, 2);
-        clk.print(buffer);
-        clk.setTextColor(TFT_WHITE);
-        clk.print("V");
+        auto draw_max_values = []() {
+            char buffer[4];
+            clk.setCursor(170, 30);
+            clk.print("MAX:");
+            
+            clk.setCursor(170, 50);
+            clk.setTextColor(TFT_RED);
+            sprintf_float(POWERMETER::MAX_VOLTAGE, buffer, 2);
+            clk.print(buffer);
+            clk.setTextColor(default_color);
+            clk.print("V");
 
-        clk.setCursor(170, 70);
-        clk.setTextColor(TFT_GREEN);
-        sprintf_float(POWERMETER::MAX_CURRENT, buffer, 2);
-        clk.print(buffer);
-        clk.setTextColor(TFT_WHITE);
-        clk.print("A");
+            clk.setCursor(170, 70);
+            clk.setTextColor(TFT_GREEN);
+            sprintf_float(POWERMETER::MAX_CURRENT, buffer, 2);
+            clk.print(buffer);
+            clk.setTextColor(default_color);
+            clk.print("A");
+        };
+        draw_max_values(); // 调用最大值绘制函数
 
-        //连接图标
-        if(is_conect){
-            clk.pushImage(180, 90, __WIFI_WIDTH, __WIFI_HEIGHT, __wifi);
-        }else{
-            clk.pushImage(180, 90, __CLOSE_WIFI_WIDTH, __CLOSE_WIFI_HEIGHT, __close_wifi);
-        }
+        // 连接图标
+        auto draw_connection_icon = []() {
+            if (is_conect) {
+                clk.pushImage(180, 90, __WIFI_WIDTH, __WIFI_HEIGHT, __wifi);
+            } else {
+                clk.pushImage(180, 90, __CLOSE_WIFI_WIDTH, __CLOSE_WIFI_HEIGHT, __close_wifi);
+            }
+        };
+        draw_connection_icon(); // 调用连接图标绘制函数
+
         // 绘制分割线
         for (int i = 0; i < 3; i++) {
             clk.drawLine(162 + i, 0, 162 + i, 135, TFT_YELLOW); // 分割线用黄色
         }
+        clk.setTextColor(TFT_WHITE);
     }
 
     // 累计电量页面绘制函数
     void amperage_page() {
-        clk.setCursor(0, 15);
-        char buffer[4];
-        sprintf_float(POWERMETER::output_mah, buffer, 4); // 显示累计毫安时
-        clk.setTextFont(6);
-        clk.setTextSize(1);
-        clk.print(buffer);
-        clk.setTextFont(1);
-        clk.setTextSize(5);
-        clk.print("mAH");
+        const uint16_t default_color = TFT_WHITE; // 默认颜色
+        const uint16_t mah_color = TFT_RED;       // mAH颜色
+        const uint16_t mwh_color = TFT_GREEN;     // mWH颜色
+        const uint16_t time_color = TFT_BLUE;     // 时间颜色
 
-        sprintf_float(POWERMETER::output_mwh, buffer, 4); // 显示累计毫瓦时
-        clk.setCursor(0, 60);
-        clk.setTextFont(6);
-        clk.setTextSize(1);
-        clk.print(buffer);
-        clk.setTextFont(1);
-        clk.setTextSize(5);
-        clk.print("mWH");
+        // 显示累计毫安时
+        auto draw_output_mah = []() {
+            char buffer[4];
+            sprintf_float(POWERMETER::output_mah, buffer, 4); // 显示累计毫安时
+            clk.setCursor(0, 15);
+            clk.setTextFont(6);
+            clk.setTextSize(1);
+            clk.setTextColor(mah_color); // 设置颜色
+            clk.print(buffer);
+            clk.setTextFont(1);
+            clk.setTextSize(5);
+            clk.print("mAH");
+        };draw_output_mah(); // 调用毫安时绘制函数
+
+        // 显示累计毫瓦时
+        auto draw_output_mwh = []() {
+            char buffer[4];
+            sprintf_float(POWERMETER::output_mwh, buffer, 4); // 显示累计毫瓦时
+            clk.setCursor(0, 60);
+            clk.setTextFont(6);
+            clk.setTextSize(1);
+            clk.setTextColor(mwh_color); // 设置颜色
+            clk.print(buffer);
+            clk.setTextFont(1);
+            clk.setTextSize(5);
+            clk.print("mWH");
+        };draw_output_mwh(); // 调用毫瓦时绘制函数
 
         // 显示累计时间
-        int time_m = POWERMETER::last_time / 60000000;
-        int time_s = (POWERMETER::last_time - time_m * 60000000) / 1e6;
-        int time_ms = (POWERMETER::last_time - time_m * 60000000 - time_s * 1e6) / 1000;
-        clk.setCursor(20, 110);
-        clk.setTextFont(4);
-        clk.setTextSize(1);
-        clk.print("Runtime:  ");
-        sprintf(buffer, "%4d", time_m);
-        clk.print(time_m);
-        clk.print(":");
-        sprintf(buffer, "%2d", time_s);
-        clk.print(buffer);
-        clk.print(":");
-        sprintf(buffer, "%2d", time_ms);
-        buffer[2]='\0';
-        clk.print(buffer);
+        auto draw_runtime = []() {
+            char buffer[4];
+            int time_m = POWERMETER::last_time / 60000000;
+            int time_s = (POWERMETER::last_time - time_m * 60000000) / 1e6;
+            int time_ms = (POWERMETER::last_time - time_m * 60000000 - time_s * 1e6) / 1000;
+            clk.setCursor(20, 110);
+            clk.setTextFont(4);
+            clk.setTextSize(1);
+            clk.setTextColor(time_color); // 设置颜色
+            clk.print("Runtime:  ");
+            sprintf(buffer, "%4d", time_m);
+            clk.print(time_m);
+            clk.print(":");
+            sprintf(buffer, "%2d", time_s);
+            clk.print(buffer);
+            clk.print(":");
+            sprintf(buffer, "%2d", time_ms);
+            buffer[2] = '\0';
+            clk.print(buffer);
+        };draw_runtime(); // 调用运行时间绘制函数
     }
-    
-    
-    //曲线绘制
-    static uint8_t power_curve_point[190];
-    static uint8_t voltage_curve_point[190];
-    static uint8_t current_curve_point[190];
+
+        
     // 曲线页面
     void curve_page() {
-        // 曲线低点高度
-        const float curve_mini_height=0.1;//0-1
-        // 曲线高点高度
-        const float curve_maxi_height=0.8;//0-1
+        // 曲线低点和高点高度
+        const float curve_maxi_height = 0.8;  // 0-1
+        const float curve_mini_height = 0.1; // 0-1
 
 
-        auto background = []() {
-            for(int i=50;i<240;i+=10){
+        // 曲线点缓存
+        static uint8_t power_curve_point[190];
+        static uint8_t voltage_curve_point[190];
+        static uint8_t current_curve_point[190];
+
+        // 绘制背景
+        auto draw_background = []() {
+            for (int i = 50; i < 240; i += 10) {
                 clk.drawLine(i, 0, i, 135, 0x3333);
             }
-            for (int i = 0; i < 135; i+=10)
-            {
+            for (int i = 0; i < 135; i += 10) {
                 clk.drawLine(50, i, 240, i, 0x3333);
             }
-            
-        };background();
-        //MAX部分
-        clk.setTextColor(TFT_WHITE);
-        clk.setCursor(3, 0);
-        clk.setTextFont(2);
-        clk.setTextSize(1);
-        clk.print("MAX->\n");
-        clk.setTextColor(TFT_RED);
-        clk.setCursor(3, 12);
-        clk.print(POWERMETER::voltage_queue.get_max());
-        clk.print("V\n");
-        clk.setTextColor(TFT_GREEN);
-        clk.setCursor(3, 24);
-        clk.print(POWERMETER::current_queue.get_max());
-        clk.print("A\n");
-        clk.setTextColor(TFT_BLUE);
-        clk.setCursor(3, 36);
-        clk.print(POWERMETER::power_queue.get_max());
-        clk.print("W\n");
+        };draw_background(); // 调用背景绘制函数
 
-        //MIN部分
-        clk.setTextColor(TFT_WHITE);
-        clk.setCursor(3, 135-16);
-        clk.setTextFont(2);
-        clk.setTextSize(1);
-        clk.print("MIN->\n");
-        clk.setTextColor(TFT_RED);
-        clk.setCursor(3, 70+12);
-        clk.print(POWERMETER::voltage_queue.get_min());
-        clk.print("V\n");
-        clk.setTextColor(TFT_GREEN);
-        clk.setCursor(3, 70+24);
-        clk.print(POWERMETER::current_queue.get_min());
-        clk.print("A\n");
-        clk.setTextColor(TFT_BLUE);
-        clk.setCursor(3, 70+36);
-        clk.print(POWERMETER::power_queue.get_min());
-        clk.print("W\n");
+        // MAX部分
+        auto draw_max_values = []() {
+            clk.setTextColor(TFT_WHITE);
+            clk.setCursor(3, 0);
+            clk.setTextFont(2);
+            clk.setTextSize(1);
+            clk.print("MAX->\n");
 
+            clk.setTextColor(TFT_RED);
+            clk.setCursor(3, 12);
+            clk.print(POWERMETER::voltage_queue.get_max());
+            clk.print("V\n");
 
-        float step=POWERMETER::READ_HZ*POWERMETER::data_save_time/190;
-        memset(power_curve_point,0,sizeof(power_curve_point));
-        memset(voltage_curve_point,0,sizeof(voltage_curve_point));
-        memset(current_curve_point,0,sizeof(current_curve_point));
+            clk.setTextColor(TFT_GREEN);
+            clk.setCursor(3, 24);
+            clk.print(POWERMETER::current_queue.get_max());
+            clk.print("A\n");
+
+            clk.setTextColor(TFT_BLUE);
+            clk.setCursor(3, 36);
+            clk.print(POWERMETER::power_queue.get_max());
+            clk.print("W\n");
+        };draw_max_values(); // 调用最大值绘制函数
+
+        // MIN部分
+        auto draw_min_values = []() {
+            clk.setTextColor(TFT_WHITE);
+            clk.setCursor(3, 135 - 16);
+            clk.setTextFont(2);
+            clk.setTextSize(1);
+            clk.print("MIN->\n");
+
+            clk.setTextColor(TFT_RED);
+            clk.setCursor(3, 70 + 12);
+            clk.print(POWERMETER::voltage_queue.get_min());
+            clk.print("V\n");
+
+            clk.setTextColor(TFT_GREEN);
+            clk.setCursor(3, 70 + 24);
+            clk.print(POWERMETER::current_queue.get_min());
+            clk.print("A\n");
+
+            clk.setTextColor(TFT_BLUE);
+            clk.setCursor(3, 70 + 36);
+            clk.print(POWERMETER::power_queue.get_min());
+            clk.print("W\n");
+        };draw_min_values(); // 调用最小值绘制函数
+
+        // 数据处理
+        float step = POWERMETER::READ_HZ * POWERMETER::data_save_time / 190;
+        memset(power_curve_point, 0, sizeof(power_curve_point));
+        memset(voltage_curve_point, 0, sizeof(voltage_curve_point));
+        memset(current_curve_point, 0, sizeof(current_curve_point));
+
+        // 曲线缩放
+        const float curve_scale = 1 / (curve_maxi_height - curve_mini_height);
         
-        //曲线缩放
-        const float curve_scale=1/(curve_maxi_height-curve_mini_height);
-        //保存为采样点
-        for(int i=0;i<190;i++){
-            if(POWERMETER::power_queue.get_max()-POWERMETER::power_queue.get_min()!=0){
-                float mini_var=POWERMETER::power_queue.get_min();
-                float data_range=POWERMETER::MAX_CURRENT*POWERMETER::MAX_VOLTAGE-mini_var;
-                power_curve_point[i]=135*(POWERMETER::power_queue.toArray()[int(i*step)]-mini_var)/(curve_scale*data_range);
-            }
+        // 保存为采样点
+        auto process_curve_points = [&]() {
+            for (int i = 0; i < 190; i++) {
+                if (POWERMETER::power_queue.get_max() - POWERMETER::power_queue.get_min() != 0) {
+                    float mini_var = POWERMETER::power_queue.get_min();
+                    float data_range = POWERMETER::MAX_CURRENT * POWERMETER::MAX_VOLTAGE - mini_var;
+                    power_curve_point[i] = 135 * (POWERMETER::power_queue.toArray()[int(i * step)] - mini_var) / (curve_scale * data_range);
+                }
 
-            if(POWERMETER::voltage_queue.get_max()-POWERMETER::voltage_queue.get_min()!=0){
-                float mini_var=POWERMETER::voltage_queue.get_min();
-                float data_range = POWERMETER::MAX_VOLTAGE-mini_var;
-                voltage_curve_point[i]=135*(POWERMETER::voltage_queue.toArray()[int(i*step)]-mini_var)/(curve_scale*data_range);
-            }
-            if(POWERMETER::current_queue.get_max()-POWERMETER::current_queue.get_min()!=0){
-                float mini_var=POWERMETER::current_queue.get_min();
-                float data_range = POWERMETER::MAX_CURRENT-mini_var;
-                current_curve_point[i]=135*(POWERMETER::current_queue.toArray()[int(i*step)]-mini_var)/(curve_scale*data_range);
-            }
-        }
+                if (POWERMETER::voltage_queue.get_max() - POWERMETER::voltage_queue.get_min() != 0) {
+                    float mini_var = POWERMETER::voltage_queue.get_min();
+                    float data_range = POWERMETER::MAX_VOLTAGE - mini_var;
+                    voltage_curve_point[i] = 135 * (POWERMETER::voltage_queue.toArray()[int(i * step)] - mini_var) / (curve_scale * data_range);
+                }
 
-        for(int i=0;i<190;i++){
-            power_curve_point[i]+=curve_mini_height*135;
-            voltage_curve_point[i]+=curve_mini_height*135;
-            current_curve_point[i]+=curve_mini_height*135;
-        }
-        //绘制曲线
-        for(int i=239;i>50;i--){
-            clk.drawLine(i, 133-power_curve_point[239-i], i-1, 133-power_curve_point[240-i], TFT_BLUE);
-            clk.drawLine(i, 133-voltage_curve_point[239-i], i-1, 133-voltage_curve_point[240-i], TFT_RED);
-            clk.drawLine(i, 133-current_curve_point[239-i], i-1, 133-current_curve_point[240-i], TFT_GREEN);
-        }
+                if (POWERMETER::current_queue.get_max() - POWERMETER::current_queue.get_min() != 0) {
+                    float mini_var = POWERMETER::current_queue.get_min();
+                    float data_range = POWERMETER::MAX_CURRENT - mini_var;
+                    current_curve_point[i] = 135 * (POWERMETER::current_queue.toArray()[int(i * step)] - mini_var) / (curve_scale * data_range);
+                }
+            }
+        };process_curve_points(); // 处理曲线数据
 
-        clk.setTextColor(TFT_WHITE);
+        // 调整曲线
+        auto fix_curve_points = [&]() {
+            // 调整曲线点位置
+            for (int i = 0; i < 190; i++) {
+                power_curve_point[i] += curve_mini_height * 135;
+                voltage_curve_point[i] += curve_mini_height * 135;
+                current_curve_point[i] += curve_mini_height * 135;
+            }
+        };fix_curve_points();
+
+        // 绘制曲线
+        auto draw_curves = []() {
+            for (int i = 239; i > 50; i--) {
+                clk.drawLine(i, 133 - power_curve_point[239 - i], i - 1, 133 - power_curve_point[240 - i], TFT_BLUE);
+                clk.drawLine(i, 133 - voltage_curve_point[239 - i], i - 1, 133 - voltage_curve_point[240 - i], TFT_RED);
+                clk.drawLine(i, 133 - current_curve_point[239 - i], i - 1, 133 - current_curve_point[240 - i], TFT_GREEN);
+            }
+        };draw_curves(); // 调用曲线绘制函数
+
+        clk.setTextColor(TFT_WHITE); // 重置文本颜色
     }
+
 
     void wireless_page() {
         clk.setCursor(10, 15);
@@ -313,9 +389,17 @@ namespace SCREEN {
 
         clk.setTextColor(TFT_WHITE);
     }
-    // 页面列表
-    std::list<std::function<void()>> page_list;                    // 存储多个页面
-    std::list<std::function<void()>>::iterator now_page = page_list.begin(); // 当前页面
+
+    // 模板页面
+    // void temple_page() {
+    //     clk.setCursor(10, 15);//设置坐标
+    //     clk.setTextFont(4);//设置使用的默认字体序号
+    //     clk.setTextSize(1);//设置字体大小
+    //     clk.setTextColor(TFT_WHITE);
+    //     clk.print("temple:");
+    // }
+
+    /*↑↑↑↑↑↑↑↑↑页面函数区域↑↑↑↑↑↑↑↑↑*/
 
     // 屏幕更新任务
     void updatescreen(void * pvParameters) {
@@ -323,10 +407,14 @@ namespace SCREEN {
         tft.setRotation(3);                                        // 设置屏幕方向
         tft.fillScreen(TFT_BLACK);                                 // 清空屏幕
 
+        /*下面添加页面函数，修改添加顺序可以修改显示顺序*/ 
         page_list.push_back(mian_page);                            // 添加主页面
         page_list.push_back(amperage_page);                        // 添加累计电量页面
         page_list.push_back(curve_page);                           // 添加曲线页面
         page_list.push_back(wireless_page);                        // 添加无线页面
+        // page_list.push_back(temple_page);                         // 添加模板页面
+        /*添加页面函数*/
+
         now_page = page_list.begin();                              // 初始化当前页面
 
         clk.createSprite(240, 135);                                // 创建缓冲区
@@ -334,7 +422,7 @@ namespace SCREEN {
             tft.startWrite();
             clk.fillSprite(TFT_BLACK);                             // 清空缓冲区
             now_page->operator()();                                // 调用当前页面的绘制函数
-            clk.drawRoundRect(0, 0, 240, 135, 0, TFT_YELLOW);      // 绘制矩形边框
+            clk.drawRoundRect(0, 0, 240, 135, 0, border_color);      // 绘制矩形边框
             clk.pushSprite(0, 0);                                  // 将缓冲区内容推送到屏幕
             tft.endWrite();                                        // 结束写入
             delay(1000 / SCREEN_HZ);                               // 控制刷新率
