@@ -7,6 +7,7 @@
 #ifndef POWERCTRL_HPP
 #define POWERCTRL_HPP
 #include <Arduino.h>
+// 电源控制类型
 class POWERCTRL_t {
     public:
     void setup(bool state=false) {

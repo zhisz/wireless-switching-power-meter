@@ -7,12 +7,12 @@
 
 #include <Arduino.h>
 #include "PINS.h"
-#include "powerctrl.hpp"
-#include "TemperatureSensor.hpp"
-#include "buzz.hpp"
-#include "ESPNOW.hpp"
-#include "BUTTONS.HPP"
-#include "SCREEN.hpp"
+#include "powerctrl.hpp"// 电源控制
+#include "TemperatureSensor.hpp"// 温度传感器
+#include "buzz.hpp"// 蜂鸣器
+#include "WIRELESSCTRL.hpp"// 无线控制
+#include "BUTTONS.HPP"// 按键
+#include "SCREEN.hpp"// 屏幕
 
 // 初始化各种模块
 POWERCTRL_t power_output(PowerPin);           // 电源控制
@@ -37,5 +37,5 @@ void setup() {
     
 }
 
-// Arduino主循环,不使用
+// Arduino主循环,本项目不使用
 void loop() {}

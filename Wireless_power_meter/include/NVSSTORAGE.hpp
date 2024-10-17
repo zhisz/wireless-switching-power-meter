@@ -7,6 +7,7 @@
 #ifndef NVSSTORAGE_HPP
 #define NVSSTORAGE_HPP
 #include "Preferences.h"
+//将数据保存在NVS存储中,断电保存
 namespace NVSSTORAGE {
     Preferences preferences;
     uint8_t pair_mac[6];

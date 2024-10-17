@@ -10,8 +10,10 @@
 #include "FixedSizeQueue.hpp"
 // 输入电压电流读取相关
 namespace POWERMETER {
-    const int READ_HZ = 100;                  // 读取电压电流的频率
-    const int data_save_time=2;              // 保存数据的时间 秒
+    constexpr int READ_HZ = 100;                  // 读取电压电流的频率
+    constexpr int data_save_time=3;              // 保存数据的时间 秒
+
+
     INA226 PowerSensor(0x40);                 // 创建INA226传感器对象
     double voltage = 0;                       // 电压
     double current = 0;                       // 电流

@@ -7,6 +7,8 @@
 #ifndef TEMPERATURESENSOR_HPP
 #define TEMPERATURESENSOR_HPP
 #include "driver/temp_sensor.h"
+
+//温度传感器
 class TemperatureSensor_t{
     public:
     void setup() {

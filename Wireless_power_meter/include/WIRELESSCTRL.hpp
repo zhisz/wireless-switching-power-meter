@@ -6,8 +6,8 @@
 #include "NVSSTORAGE.hpp"
 #include "ESPNOW.hpp"
 extern POWERCTRL_t power_output;
-uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地址,默认广播地址
-
+uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地址,初始化为广播地址
+// 远程控制相关
 namespace WIRELESSCTRL {
     
     void pair_func(data_package receive_data){

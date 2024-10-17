@@ -45,7 +45,7 @@ void sprintf_float(double value, char* buffer, int len) {
 
 // 屏幕显示相关
 namespace SCREEN {
-    const int SCREEN_HZ = 60;                 // 屏幕刷新率
+    constexpr int SCREEN_HZ = 60;                 // 屏幕刷新率
 
     // 页面列表
     std::list<std::function<void()>> page_list;                    // 页面列表
@@ -55,17 +55,17 @@ namespace SCREEN {
     TFT_eSPI tft = TFT_eSPI();                // 创建屏幕对象
     TFT_eSprite clk = TFT_eSprite(&tft);      // 创建缓冲区
 
-    const uint16_t border_color = TFT_YELLOW;    //边框颜色
+    constexpr uint16_t border_color = TFT_YELLOW;    //边框颜色
 
 
     /*↓↓↓↓↓↓↓↓页面函数区域↓↓↓↓↓↓↓↓*/
     // 主页面绘制函数
     void mian_page() {
-        const uint16_t default_color = TFT_WHITE; // 保存默认颜色
-        const uint16_t voltage_color = TFT_RED;   // 电压颜色
-        const uint16_t current_color = TFT_GREEN;  // 电流颜色
-        const uint16_t power_color = TFT_BLUE;    // 功率颜色
-        const uint16_t line_color = border_color; // 分割线颜色
+        constexpr uint16_t default_color = TFT_WHITE; // 保存默认颜色
+        constexpr uint16_t voltage_color = TFT_RED;   // 电压颜色
+        constexpr uint16_t current_color = TFT_GREEN;  // 电流颜色
+        constexpr uint16_t power_color = TFT_BLUE;    // 功率颜色
+        constexpr uint16_t line_color = border_color; // 分割线颜色
 
         clk.setTextColor(default_color); // 默认文本颜色
 
@@ -181,10 +181,10 @@ namespace SCREEN {
 
     // 累计电量页面绘制函数
     void amperage_page() {
-        const uint16_t default_color = TFT_WHITE; // 默认颜色
-        const uint16_t mah_color = TFT_RED;       // mAH颜色
-        const uint16_t mwh_color = TFT_GREEN;     // mWH颜色
-        const uint16_t time_color = TFT_BLUE;     // 时间颜色
+        constexpr uint16_t default_color = TFT_WHITE; // 默认颜色
+        constexpr uint16_t mah_color = TFT_RED;       // mAH颜色
+        constexpr uint16_t mwh_color = TFT_GREEN;     // mWH颜色
+        constexpr uint16_t time_color = TFT_BLUE;     // 时间颜色
 
         // 显示累计毫安时
         auto draw_output_mah = []() {
@@ -241,8 +241,8 @@ namespace SCREEN {
     // 曲线页面
     void curve_page() {
         // 曲线低点和高点高度
-        const float curve_maxi_height = 0.8;  // 0-1
-        const float curve_mini_height = 0.1; // 0-1
+        constexpr float curve_maxi_height = 0.8;  // 0-1
+        constexpr float curve_mini_height = 0.1; // 0-1
 
 
         // 曲线点缓存
@@ -315,7 +315,7 @@ namespace SCREEN {
         memset(current_curve_point, 0, sizeof(current_curve_point));
 
         // 曲线缩放
-        const float curve_scale = 1 / (curve_maxi_height - curve_mini_height);
+        constexpr float curve_scale = 1 / (curve_maxi_height - curve_mini_height);
         
         // 保存为采样点
         auto process_curve_points = [&]() {
@@ -352,10 +352,10 @@ namespace SCREEN {
 
         // 绘制曲线
         auto draw_curves = []() {
-            for (int i = 239; i > 50; i--) {
-                clk.drawLine(i, 133 - power_curve_point[239 - i], i - 1, 133 - power_curve_point[240 - i], TFT_BLUE);
-                clk.drawLine(i, 133 - voltage_curve_point[239 - i], i - 1, 133 - voltage_curve_point[240 - i], TFT_RED);
-                clk.drawLine(i, 133 - current_curve_point[239 - i], i - 1, 133 - current_curve_point[240 - i], TFT_GREEN);
+            for (int i = 1; i < 190; i++) {
+                clk.drawLine(i+50, 133 - power_curve_point[i], i+49, 133 - power_curve_point[i-1], TFT_BLUE);// 功率曲线
+                clk.drawLine(i+50, 133 - voltage_curve_point[i], i+49, 133 - voltage_curve_point[i-1], TFT_RED);// 电压曲线
+                clk.drawLine(i+50, 133 - current_curve_point[i], i+49, 133 - current_curve_point[i-1], TFT_GREEN);// 电流曲线
             }
         };draw_curves(); // 调用曲线绘制函数
 

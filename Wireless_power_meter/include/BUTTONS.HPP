@@ -10,7 +10,7 @@
 #include "OneButton.h"
 #include "SCREEN.hpp"
 OneButton right_button(BUT1, true);           // 右按键
-OneButton big_button(BUT2, true);             // 中按键
+OneButton big_button(BUT2, true);             // 大按键
 OneButton left_button(BUT3, true);            // 左按键
 
 
