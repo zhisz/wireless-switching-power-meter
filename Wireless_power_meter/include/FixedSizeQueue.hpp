@@ -16,6 +16,14 @@ private:
     std::queue<T> queue;
     size_t capacity;
 
+    T* array = new T[N];
+    T max;
+    int max_index;
+    T min;
+    int min_index;
+    T total_value;
+    T average;
+
 public:
     FixedSizeQueue() : capacity(N) {}
 
@@ -31,13 +39,13 @@ public:
             
             if(max_index>=N){// 如果最大值已经出队，查找当前队列最大值
                 std::queue<T> copy = queue;//复制队列
-                T max=copy.front();//队首元素
+                max=copy.front();//队首元素
                 int now_index=0;//当前索引
                 max_index=0;//队首元素为最大值情况
                 while (!copy.empty()) {//遍历队列
-                    T value = copy.front();
+                    T _value = copy.front();
                     copy.pop();
-                    if (value > max) {//更新最大值
+                    if (_value > max) {//更新最大值
                         max = value;//更新最大值
                         max_index = now_index;//更新最大值索引
                         break;
@@ -47,14 +55,14 @@ public:
             }
             if(min_index>=N){// 如果最小值已经出队，查找当前队列最小值
                 std::queue<T> copy = queue;//复制队列
-                T min=copy.front();//队首元素
+                min=copy.front();//队首元素
                 int now_index=0;//当前索引
                 min_index=0;//队首元素为最小值情况
                 while (!copy.empty()) {//遍历队列
-                    T value = copy.front();
+                    T _value = copy.front();
                     copy.pop();
-                    if (value < min) {//更新最小值
-                        min = value;//更新最小值
+                    if (_value < min) {//更新最小值
+                        min = _value;//更新最小值
                         min_index = now_index;//更新最小值索引
                         break;
                     }
@@ -83,28 +91,30 @@ public:
         queue.push(value); // 添加新元素
         max_index++;
         min_index++;
-
+    }
+    T back(){
+        return queue.back();
     }
 
-    bool isEmpty() const {
+    bool isEmpty(){
         return queue.empty();
     }
 
-    size_t size() const {
+    size_t size(){
         return queue.size();
     }
     std::queue<T> copy(){
         return queue;
     }
-    T get_average() const {
+    T get_average(){
         return total_value / queue.size();
     }
 
-    T get_max() const {
+    T get_max(){
         return max;
     }
 
-    T get_min() const {
+    T get_min(){
         return min;
     }
     T* toArray(){
@@ -122,14 +132,5 @@ public:
         }
         return array;
     }
-    private:
-    T* array = new T[N];
-    T max;
-    int max_index;
-    T min;
-    int min_index;
-    T total_value;
-    T average;
-
 };
 #endif // FixedSizeQueue_HPP

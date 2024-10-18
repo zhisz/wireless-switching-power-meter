@@ -11,16 +11,15 @@ uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地�
 namespace WIRELESSCTRL {
     
     void pair_func(data_package receive_data){
-        uint8_t* pair_mac;
-        memcpy(pair_mac, receive_data.data,6);
-        NVSSTORAGE::pair_mac[0]=pair_mac[0];
-        NVSSTORAGE::pair_mac[1]=pair_mac[1];
-        NVSSTORAGE::pair_mac[2]=pair_mac[2];
-        NVSSTORAGE::pair_mac[3]=pair_mac[3];
-        NVSSTORAGE::pair_mac[4]=pair_mac[4];
-        NVSSTORAGE::pair_mac[5]=pair_mac[5];
+
+        NVSSTORAGE::pair_mac[0]=receive_data.data[0];
+        NVSSTORAGE::pair_mac[1]=receive_data.data[1];
+        NVSSTORAGE::pair_mac[2]=receive_data.data[2];
+        NVSSTORAGE::pair_mac[3]=receive_data.data[3];
+        NVSSTORAGE::pair_mac[4]=receive_data.data[4];
+        NVSSTORAGE::pair_mac[5]=receive_data.data[5];
         NVSSTORAGE::NVS_save();
-        esp_now_send_package("pair",self_Macaddress,6,NVSSTORAGE::pair_mac);
+        esp_now_send_package("pair",self_Macaddress,6,receive_MACAddress);
     }
 
     // 心跳控制相关
@@ -112,7 +111,7 @@ namespace WIRELESSCTRL {
         memcpy(data, receive_data.data,receive_data.data_len);
         bool is_continue = *(bool*)data;
         int frc=*(int*)(data+1);
-        if(frc!=0&&frc!=send_data_frc){
+        if(frc!=0){
             send_data_frc=frc;
         }
         if(is_continue&&send_data_task_handle==nullptr){

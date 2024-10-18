@@ -21,9 +21,9 @@ namespace PowerCtrl{
         uint32_t runtime;
     }power_data;
     void send_pair_package(){
-        uint8_t* self_mac;
+        uint8_t self_mac[6];
         WiFi.macAddress(self_mac);
-        esp_now_send_package("pair",self_mac,6,NVSSTORAGE::pair_mac);
+        esp_now_send_package("pair",self_mac,6,receive_MACAddress);
 
     }
     void power_on(){

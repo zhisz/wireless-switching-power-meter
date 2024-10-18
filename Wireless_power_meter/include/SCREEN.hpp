@@ -10,12 +10,17 @@
 #include <TFT_eSPI.h>
 #include <SPI.h>
 #include <list> 
-#include "pic/wifi_pic.hpp"
+
+
 #include "NVSSTORAGE.hpp"
 #include "POWERMETER.hpp"
 #include "powerctrl.hpp"
 #include "WIRELESSCTRL.hpp"
 #include "TemperatureSensor.hpp"
+
+#include "pic/wifi_img.hpp"
+#include "pic/robocon_img.hpp"
+#include "pic/CQUPTHXC_img.hpp"
 extern TemperatureSensor_t Temperature_sensor; 
 extern POWERCTRL_t power_output;
 
@@ -243,7 +248,7 @@ namespace SCREEN {
         // 曲线低点和高点高度
         constexpr float curve_maxi_height = 0.8;  // 0-1
         constexpr float curve_mini_height = 0.1; // 0-1
-
+        constexpr int smooth_curve_level = 1;    // 平滑曲线的等级
 
         // 曲线点缓存
         static uint8_t power_curve_point[190];
@@ -340,7 +345,26 @@ namespace SCREEN {
             }
         };process_curve_points(); // 处理曲线数据
 
-        // 调整曲线
+        //平滑曲线
+        auto smooth_curve_points = [&]() {
+            for (int i = 0; i < smooth_curve_level; i++) {
+                power_curve_point[0] = power_curve_point[1]+power_curve_point[0]/2;
+                voltage_curve_point[0] = voltage_curve_point[1]+voltage_curve_point[0]/2;
+                current_curve_point[0] = current_curve_point[1]+current_curve_point[0]/2;
+                for (int i = 1; i < 189; i++) {
+                    power_curve_point[i] = (power_curve_point[i-1] + power_curve_point[i] + power_curve_point[i + 1]) / 3;
+                    voltage_curve_point[i] = (voltage_curve_point[i-1] + voltage_curve_point[i] + voltage_curve_point[i+1]) / 3;
+                    current_curve_point[i] = (current_curve_point[i-1] + current_curve_point[i] + current_curve_point[i+1]) / 3;
+                }
+                power_curve_point[189] = power_curve_point[188]+power_curve_point[189]/2;
+                voltage_curve_point[189] = voltage_curve_point[188]+voltage_curve_point[189]/2;
+                current_curve_point[189] = current_curve_point[188]+current_curve_point[189]/2;
+            }
+        };smooth_curve_points();
+
+
+
+        // 调整曲线高度
         auto fix_curve_points = [&]() {
             // 调整曲线点位置
             for (int i = 0; i < 190; i++) {
@@ -348,8 +372,10 @@ namespace SCREEN {
                 voltage_curve_point[i] += curve_mini_height * 135;
                 current_curve_point[i] += curve_mini_height * 135;
             }
+
         };fix_curve_points();
 
+    
         // 绘制曲线
         auto draw_curves = []() {
             for (int i = 1; i < 190; i++) {
@@ -418,6 +444,25 @@ namespace SCREEN {
         now_page = page_list.begin();                              // 初始化当前页面
 
         clk.createSprite(240, 135);                                // 创建缓冲区
+
+        // 打印LOGO
+        auto print_start_img = []() {
+            tft.startWrite();
+            clk.fillSprite(TFT_BLACK);
+            clk.pushImage(0, 0, ROBOCONIMG_WIDTH, ROBOCONIMG_HEIGHT, ROBOCONIMG);
+            clk.pushSprite(0, 0);
+            tft.startWrite();
+            tft.endWrite();
+            delay(750);
+            tft.startWrite();
+            clk.fillSprite(TFT_BLACK);
+            clk.pushImage(0, 0, CQUPTHXC_LOGO_WIDTH, CQUPTHXC_LOGO_HEIGHT, CQUPTHXC_LOGO);
+            clk.pushSprite(0, 0);
+            tft.endWrite();
+            delay(750);
+        };print_start_img();
+
+        
         while (true) {
             tft.startWrite();
             clk.fillSprite(TFT_BLACK);                             // 清空缓冲区

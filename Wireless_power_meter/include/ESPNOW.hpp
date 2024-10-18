@@ -102,8 +102,9 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
 
 //ESP-NOW初始化
 esp_now_peer_info_t peerInfo;
-void esp_now_setup(uint8_t* receive_MAC) {
-  
+esp_now_peer_info_t  broadcastInfo;
+void esp_now_setup(uint8_t* receive_MAC=receive_MACAddress){
+
   WiFi.mode(WIFI_STA);
   if (esp_now_init() != ESP_OK) {
       Serial.println("ESP-NOW initialization failed");
@@ -112,10 +113,12 @@ void esp_now_setup(uint8_t* receive_MAC) {
 
   peerInfo.ifidx = WIFI_IF_STA;
   memcpy(peerInfo.peer_addr, receive_MAC, 6);
+  esp_now_add_peer(&peerInfo);
 
-  if (esp_now_add_peer(&peerInfo) != ESP_OK){
-      Serial.println("Failed to add peer");
-      return;
+  if(receive_MAC!=receive_MACAddress){
+    broadcastInfo.ifidx = WIFI_IF_STA;
+    memcpy(broadcastInfo.peer_addr, receive_MAC, 6);
+    esp_now_add_peer(&peerInfo);
   }
   esp_now_register_recv_cb(OnDataRecv);
 } 

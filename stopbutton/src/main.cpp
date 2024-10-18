@@ -33,60 +33,79 @@ namespace Battery{
     }
   }
 }
-
-
-
 void screentask( void *pvParameters ) {
+  u8g2.begin();
+  PowerCtrl::ctrl_send_data(true,10);
   while (true){
+    
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_ncenB14_tr);
-    u8g2.drawStr(4,30,"RUNING!");
-    u8g2.setFont(u8g2_font_courB08_tf);
-    u8g2.setCursor(0,50);
-    u8g2.print(Battery::battery_voltage);
+    u8g2.setCursor(4,20);
+    u8g2.print(PowerCtrl::power_data.voltage);
+    u8g2.print("V");
+    u8g2.setCursor(4,45);
+    u8g2.print(PowerCtrl::power_data.current);
+    u8g2.print("A");
+    
+    u8g2.setCursor(4,60);
+    if(digitalRead(buttonPIN)){
+      u8g2.print("ON");
+    }else{
+      u8g2.print("OFF");
+    }
     u8g2.sendBuffer(); 
     delay(100);
   }
-
 }
 void LEDTask(void* p){
     pinMode(LEDPIN, OUTPUT);
-    ledcAttachPin(LEDPIN, 0);
-    ledcSetup(0, 5000, 8);
-    while(1){
-      for(int i=0;i<255;i++){
-        ledcWrite(0,i);
-        delay(5);
-      }
-      for(int i=0;i<255;i++){
-        ledcWrite(0,255-i);
-        delay(5);
+    digitalWrite(LEDPIN, HIGH);
+    // ledcAttachPin(LEDPIN, 3);
+    // ledcSetup(0, 5000, 8);
+    // while(1){
+    //   for(int i=0;i<255;i++){
+    //     ledcWrite(3,i);
+    //     delay(5);
+    //   }
+    //   for(int i=0;i<255;i++){
+    //     ledcWrite(3,255-i);
+    //     delay(5);
+    //   }
+    // }
+}
+
+void ctrl(void *p){
+  bool state=digitalRead(buttonPIN);
+  while(1){
+    if(state!=digitalRead(buttonPIN)){
+      if(digitalRead(buttonPIN)){
+        PowerCtrl::power_on();
+      }else{
+        PowerCtrl::power_off();
       }
     }
-}
-
-bool detect_usb_plugin() {//检测是否插入USB
-  int FIFO=Serial.availableForWrite();//记录串口缓冲区剩余空间
-  Serial.println("detect_usb_plugin");//串口打印一些信息
-  delay(10);//等待发送
-  int FIFO2=Serial.availableForWrite();//再次记录串口缓冲区剩余空间
-  if(FIFO==FIFO2){//如果两次记录的剩余空间相同，说明数据发送出去了，插入USB
-    return true;
-  }else{
-    return false;//如果两次记录的剩余空间不同，说明没有插入USB
+    state=digitalRead(buttonPIN);
+    delay(1);
   }
 }
-
 void setup() 
 {
-  u8g2.begin();
+  
   Serial.begin(115200);
   pinMode(buttonPIN, INPUT_PULLUP);
-  xTaskCreate(screentask, "screentask", 2048, NULL, 5, NULL);
-  xTaskCreate(LEDTask, "LEDTask", 512, NULL, 5, NULL);
-  xTaskCreate(Battery::voltreadtask, "voltreadtask", 512, NULL, 1, NULL);
+
+  NVSSTORAGE::NVS_read();
   PowerCtrl::setup();
+  xTaskCreate(screentask, "screentask", 16384, NULL, 4, NULL);
+  xTaskCreate(ctrl, "ctrl", 2048, NULL, 1, NULL);
+  // //xTaskCreate(LEDTask, "LEDTask", 2048, NULL, 5, NULL);
+  //xTaskCreate(Battery::voltreadtask, "voltreadtask", 512, NULL, 1, NULL);
+
+  //PowerCtrl::send_pair_package();
+  
+
 
 }
  
-void loop() {}
+void loop() {
+}

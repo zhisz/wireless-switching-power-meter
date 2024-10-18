@@ -41,7 +41,6 @@ namespace POWERMETER {
             int16_t data = *(int16_t*)&row_data;
             data = data > 0 ? data : -data;
             current = double(data) * 1e-3;     // 转换电流数据
-
             // 更新最大电压和最大电流
             if (voltage > MAX_VOLTAGE) MAX_VOLTAGE = voltage;
             if (current > MAX_CURRENT) MAX_CURRENT = current;
