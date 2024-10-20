@@ -21,7 +21,7 @@ namespace POWERMETER {
     double output_mwh = 0;                    // 输出的毫瓦时
     float MAX_CURRENT = 0;                    // 最大电流
     float MAX_VOLTAGE = 0;                    // 最大电压
-    int64_t last_time = micros();             // 上次读取的时间
+    uint32_t last_time = millis();             // 上次读取的时间
     FixedSizeQueue<float,READ_HZ*data_save_time> voltage_queue;         // 电压队列
     FixedSizeQueue<float,READ_HZ*data_save_time> current_queue;         // 电流队列
     FixedSizeQueue<float,READ_HZ*data_save_time> power_queue;         // 功率队列
@@ -35,7 +35,7 @@ namespace POWERMETER {
         while (true) {
             voltage = PowerSensor.getBusVoltage(); // 读取电压
             uint16_t row_data = PowerSensor.getRegister(1); // 读取寄存器中的电流数据
-            last_time = micros();              // 更新上次读取时间
+            last_time = millis();              // 更新上次读取时间
 
             // 处理电流数据
             int16_t data = *(int16_t*)&row_data;
@@ -46,8 +46,8 @@ namespace POWERMETER {
             if (current > MAX_CURRENT) MAX_CURRENT = current;
 
             // 计算输出的毫安时和毫瓦时
-            output_mah += current * (micros() - last_time) / 3600000.0;
-            output_mwh += voltage * current * (micros() - last_time) / 3600000.0;
+            output_mah += current * (millis() - last_time) / 3600.0;
+            output_mwh += voltage * current * (millis() - last_time) / 3600.0;
 
             // 更新电压队列
             voltage_queue.push(voltage);

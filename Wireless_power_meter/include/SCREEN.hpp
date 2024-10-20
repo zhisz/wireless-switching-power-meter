@@ -21,6 +21,7 @@
 #include "pic/wifi_img.hpp"
 #include "pic/robocon_img.hpp"
 #include "pic/CQUPTHXC_img.hpp"
+#include "pic/JLC_LOGO.hpp"
 extern TemperatureSensor_t Temperature_sensor; 
 extern POWERCTRL_t power_output;
 
@@ -222,9 +223,9 @@ namespace SCREEN {
         // 显示累计时间
         auto draw_runtime = []() {
             char buffer[4];
-            int time_m = POWERMETER::last_time / 60000000;
-            int time_s = (POWERMETER::last_time - time_m * 60000000) / 1e6;
-            int time_ms = (POWERMETER::last_time - time_m * 60000000 - time_s * 1e6) / 1000;
+            int time_m = POWERMETER::last_time / 60000;
+            int time_s = (POWERMETER::last_time % 60000) / 1000;
+            int time_ms = POWERMETER::last_time%100;
             clk.setCursor(20, 110);
             clk.setTextFont(4);
             clk.setTextSize(1);
@@ -461,6 +462,13 @@ namespace SCREEN {
             clk.pushSprite(0, 0);
             tft.endWrite();
             delay(750);
+            tft.startWrite();
+            clk.fillSprite(TFT_BLACK);
+            clk.pushImage(0, 0, JLC_LOGO_WIDTH, JLC_LOGO_HEIGHT, JLC_LOGO);
+            clk.pushSprite(0, 0);
+            tft.endWrite();
+            delay(2000);
+
         };print_start_img();
 
         
