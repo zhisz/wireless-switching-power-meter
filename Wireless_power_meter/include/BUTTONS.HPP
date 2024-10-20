@@ -6,7 +6,7 @@
  */
 #ifndef BUTTONS_HPP
 #define BUTTONS_HPP
-#include "PINS.h"
+#include "static/PINS.h"
 #include "OneButton.h"
 #include "SCREEN.hpp"
 OneButton right_button(BUT1, true);           // 右按键
@@ -41,6 +41,15 @@ namespace BUTTON {
             }
         };
 
+        auto left_button_long_pressed_func = []() {
+            if(SCREEN::screen_rotation == 3) {
+                SCREEN::screen_rotation = 1;
+            }else {
+                SCREEN::screen_rotation=3;
+            }
+            SCREEN::tft.setRotation(SCREEN::screen_rotation);
+        };
+
         // 定义右按键按下时的操作（切换到下一个页面）
         auto right_button_pressed_func = []() {
             if (SCREEN::now_page == --SCREEN::page_list.end()) { // 如果当前是最后一个页面，跳到第一个页面
@@ -56,6 +65,9 @@ namespace BUTTON {
         big_button.setLongPressIntervalMs(1000); // 设置长按时间为1秒
 
         left_button.attachClick(left_button_pressed_func); // 左按键点击切换页面
+        left_button.attachLongPressStart(left_button_long_pressed_func);// 左按键长按旋转屏幕
+        left_button.setLongPressIntervalMs(1000);
+
         right_button.attachClick(right_button_pressed_func); // 右按键点击切换页面
 
         while (true) {

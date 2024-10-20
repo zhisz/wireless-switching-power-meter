@@ -7,6 +7,8 @@
 #ifndef POWERCTRL_HPP
 #define POWERCTRL_HPP
 #include <Arduino.h>
+#include "buzz.hpp"
+extern BUZZ_t buzz;
 // 电源控制类型
 class POWERCTRL_t {
     public:
@@ -27,6 +29,9 @@ class POWERCTRL_t {
         last_change_time = millis();
         power = true;
         digitalWrite(pin, power);
+        buzz.buzz(0.8);
+        delay(300);
+        buzz.buzz(0);
     }
 
     void off() {
@@ -38,6 +43,9 @@ class POWERCTRL_t {
         last_change_time = millis();
         power = false;
         digitalWrite(pin, power);
+        buzz.buzz(0.8);
+        delay(300);
+        buzz.buzz(0);
     }
     bool getstate() { return power; }
     private:

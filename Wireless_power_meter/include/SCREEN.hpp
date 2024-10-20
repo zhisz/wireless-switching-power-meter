@@ -1,6 +1,6 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 屏幕显示相关
  * @Author: qingmeijiupiao
  * @Date: 2024-10-13 17:24:35
  */
@@ -13,10 +13,10 @@
 
 
 #include "NVSSTORAGE.hpp"
-#include "POWERMETER.hpp"
-#include "powerctrl.hpp"
+#include "static/POWERMETER.hpp"
+#include "static/powerctrl.hpp"
 #include "WIRELESSCTRL.hpp"
-#include "TemperatureSensor.hpp"
+#include "static/TemperatureSensor.hpp"
 
 #include "pic/wifi_img.hpp"
 #include "pic/robocon_img.hpp"
@@ -51,7 +51,7 @@ void sprintf_float(double value, char* buffer, int len) {
 // 屏幕显示相关
 namespace SCREEN {
     constexpr int SCREEN_HZ = 60;                 // 屏幕刷新率
-
+    uint8_t screen_rotation = 3;                         // 屏幕旋转方向,1 OR 3
     // 页面列表
     std::list<std::function<void()>> page_list;                    // 页面列表
     std::list<std::function<void()>>::iterator now_page = page_list.begin(); // 当前页面
@@ -429,8 +429,9 @@ namespace SCREEN {
 
     // 屏幕更新任务
     void updatescreen(void * pvParameters) {
+
         tft.init();                                                // 初始化屏幕
-        tft.setRotation(3);                                        // 设置屏幕方向
+        tft.setRotation(screen_rotation);                          // 设置屏幕方向
         tft.fillScreen(TFT_BLACK);                                 // 清空屏幕
 
         /*下面添加页面函数，修改添加顺序可以修改显示顺序*/ 

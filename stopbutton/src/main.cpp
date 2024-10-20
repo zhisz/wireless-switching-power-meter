@@ -48,11 +48,13 @@ void screentask( void *pvParameters ) {
     u8g2.print("A");
     
     u8g2.setCursor(4,60);
-    if(digitalRead(buttonPIN)){
-      u8g2.print("ON");
-    }else{
-      u8g2.print("OFF");
-    }
+    // if(digitalRead(buttonPIN)){
+    //   u8g2.print("ON");
+    // }else{
+    //   u8g2.print("OFF");
+    // }
+    u8g2.print(PowerCtrl::power_data.runtime);
+    
     u8g2.sendBuffer(); 
     delay(100);
   }
@@ -74,10 +76,19 @@ void LEDTask(void* p){
     // }
 }
 
+TaskHandle_t  test_task_handle=nullptr;
+
 void ctrl(void *p){
   bool state=digitalRead(buttonPIN);
   while(1){
     if(state!=digitalRead(buttonPIN)){
+      
+      if(test_task_handle!=nullptr){
+        vTaskDelete(test_task_handle);
+        test_task_handle=nullptr;
+      }
+
+
       if(digitalRead(buttonPIN)){
         PowerCtrl::power_on();
       }else{
@@ -88,6 +99,18 @@ void ctrl(void *p){
     delay(1);
   }
 }
+
+
+void test(void *p){
+  while (1)
+  {
+    PowerCtrl::power_on();
+    delay(500);
+    PowerCtrl::power_off();
+    delay(500);
+  }
+  
+}
 void setup() 
 {
   
@@ -97,7 +120,11 @@ void setup()
   NVSSTORAGE::NVS_read();
   PowerCtrl::setup();
   xTaskCreate(screentask, "screentask", 16384, NULL, 4, NULL);
+  
   xTaskCreate(ctrl, "ctrl", 2048, NULL, 1, NULL);
+  xTaskCreate(test, "test", 2048, NULL, 1, &test_task_handle);
+
+
   // //xTaskCreate(LEDTask, "LEDTask", 2048, NULL, 5, NULL);
   //xTaskCreate(Battery::voltreadtask, "voltreadtask", 512, NULL, 1, NULL);
 

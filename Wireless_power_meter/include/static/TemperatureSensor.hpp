@@ -1,6 +1,6 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 温度传感器库
  * @Author: qingmeijiupiao
  * @Date: 2024-09-06 18:38:48
  */

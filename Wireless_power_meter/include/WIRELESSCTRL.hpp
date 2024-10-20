@@ -1,10 +1,17 @@
+/*
+ * @LastEditors: qingmeijiupiao
+ * @Description: 无线控制相关部分
+ * @Author: qingmeijiupiao
+ * @Date: 2024-10-13 17:22:46
+ */
+
 #ifndef WIRELESSCTRL_HPP
 #define WIRELESSCTRL_HPP
 #include <Arduino.h>
-#include "POWERMETER.hpp"
-#include "powerctrl.hpp"
+#include "static/POWERMETER.hpp"
+#include "static/powerctrl.hpp"
 #include "NVSSTORAGE.hpp"
-#include "ESPNOW.hpp"
+#include "static/ESPNOW.hpp"
 extern POWERCTRL_t power_output;
 uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地址,初始化为广播地址
 // 远程控制相关

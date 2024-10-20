@@ -8,8 +8,8 @@
 #ifndef OTHER_FUNCTION_HPP
 #define OTHER_FUNCTION_HPP
 #include <Arduino.h>
-#include "POWERMETER.hpp"
-#include "powerctrl.hpp"
+#include "static/POWERMETER.hpp"
+#include "static/powerctrl.hpp"
 extern POWERCTRL_t power_output;
 namespace OTHER_FUNCTION{
     /*#############串口打印######################*/
