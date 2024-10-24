@@ -16,6 +16,7 @@ OneButton left_button(BUT3, true);            // 左按键
 
 // 按键控制相关
 namespace BUTTON {
+    constexpr int BUTTON_tick_frc=1000; // 按键检测频率 HZ
     // 按键任务
     void button_task(void * pvParameters) {
         pinMode(BUT1, INPUT_PULLUP);                               // 设置按键为上拉输入模式
@@ -74,7 +75,7 @@ namespace BUTTON {
             left_button.tick(); // 检测按键状态
             right_button.tick();
             big_button.tick();
-            delay(1); // 每次循环延时2毫秒
+            delay(1000/BUTTON_tick_frc); // 控制检测频率
         }
     }
 }
