@@ -449,6 +449,7 @@ namespace SCREEN {
 
         // 打印LOGO
         auto print_start_img = []() {
+            //ROBOCON logo
             tft.startWrite();
             clk.fillSprite(TFT_BLACK);
             clk.pushImage(0, 0, ROBOCONIMG_WIDTH, ROBOCONIMG_HEIGHT, ROBOCONIMG);
@@ -456,18 +457,21 @@ namespace SCREEN {
             tft.startWrite();
             tft.endWrite();
             delay(750);
+            // 重邮和HXC LOGO
             tft.startWrite();
             clk.fillSprite(TFT_BLACK);
             clk.pushImage(0, 0, CQUPTHXC_LOGO_WIDTH, CQUPTHXC_LOGO_HEIGHT, CQUPTHXC_LOGO);
             clk.pushSprite(0, 0);
             tft.endWrite();
             delay(750);
-            tft.startWrite();
-            clk.fillSprite(TFT_BLACK);
-            clk.pushImage(0, 0, JLC_LOGO_WIDTH, JLC_LOGO_HEIGHT, JLC_LOGO);
-            clk.pushSprite(0, 0);
-            tft.endWrite();
-            delay(2000);
+
+            // 嘉立创LOGO
+            // tft.startWrite();
+            // clk.fillSprite(TFT_BLACK);
+            // clk.pushImage(0, 0, JLC_LOGO_WIDTH, JLC_LOGO_HEIGHT, JLC_LOGO);
+            // clk.pushSprite(0, 0);
+            // tft.endWrite();
+            // delay(2000);
 
         };print_start_img();
 

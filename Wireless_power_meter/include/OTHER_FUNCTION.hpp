@@ -1,6 +1,6 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 其他功能，如串口打印，过流保护，过放保护
  * @Author: qingmeijiupiao
  * @Date: 2024-10-13 17:16:26
  */

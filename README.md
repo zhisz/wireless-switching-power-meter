@@ -1,3 +1,9 @@
+<!--
+ * @LastEditors: qingmeijiupiao
+ * @Description: 
+ * @Author: qingmeijiupiao
+ * @Date: 2024-10-14 21:53:55
+-->
 # 项目介绍
 https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 # 开发框架
@@ -7,3 +13,4 @@ https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 # 文件介绍
 - Wireless_power_meter ：功率计本体代码
 - goodsbutton ：mini开关代码
+- stopbutton ：急停开关代码
