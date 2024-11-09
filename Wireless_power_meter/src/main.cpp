@@ -97,7 +97,7 @@ void setup() {
     power_output.off();//插电默认关闭电源
     buzz.setup();//蜂鸣器初始化
     NVSSTORAGE::NVS_read(); // 读取nvs存储
-    
+
     /*初始化相关外设*/
 
 
@@ -105,9 +105,10 @@ void setup() {
     xTaskCreate(BUTTON::button_task, "button_task", 512, NULL, 5, NULL); // 按键任务
     xTaskCreate(POWERMETER::updatePower, "updatePower", 2048, NULL, 5, NULL);// 电压电流更新任务
     xTaskCreate(SCREEN::updatescreen, "updatescreen", 8192, NULL, 5, NULL);// 屏幕更新任务
-    delay(3000);
-    WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
+
     /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/
+    delay(2000);// 延时防止重启
+    WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
 }
 
 // Arduino主循环,本项目不使用
