@@ -49,9 +49,9 @@ namespace WIRELESSCTRL {
     // 心跳控制回调
     void Heartbeat_func(data_package receive_data){
         if(Heartbeat_task_handle==nullptr){// 创建心跳任务
-            xTaskCreatePinnedToCore(Heartbeat_task, "Heartbeat_task", 2048, NULL, 5, &Heartbeat_task_handle, 1);
+            xTaskCreate(Heartbeat_task, "Heartbeat_task", 2048, NULL, 5, &Heartbeat_task_handle);
         }
-        uint8_t* data;
+        uint8_t data[8];
         memcpy(data, receive_data.data,receive_data.data_len);
         int frc=*(int*)data;
         int max_err=*(int*)(data+4);
@@ -153,6 +153,7 @@ namespace WIRELESSCTRL {
         callback_map["power_ctrl"]=power_ctrl;
         callback_map["get_power_state"]=send_power_state;
         callback_map["send_data_ctrl"]=send_data_ctrl;
+        
     }
 
 }
