@@ -1,9 +1,6 @@
-<!--
- * @LastEditors: qingmeijiupiao
- * @Description: 
- * @Author: qingmeijiupiao
- * @Date: 2024-10-14 21:53:55
--->
+# wireless-switching-power-meter
+基于ESP-NOW的无线开关功率计
+
 # 项目介绍
 https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 # 开发框架
