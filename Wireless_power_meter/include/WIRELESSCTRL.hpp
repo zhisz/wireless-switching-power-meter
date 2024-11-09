@@ -32,7 +32,7 @@ namespace WIRELESSCTRL {
     // 心跳控制相关
     int Heartbeat_var=0;
     TaskHandle_t Heartbeat_task_handle = nullptr;
-    int HeartbeatFRC = 10;
+    int HeartbeatFRC = 3;
     int8_t Heartbeat_max_err=5;
 
 
@@ -41,15 +41,22 @@ namespace WIRELESSCTRL {
         while (true) {
             if(Heartbeat_var>Heartbeat_max_err*1000/HeartbeatFRC){//心跳超时
                 power_output.off();// 关闭电源
+                Heartbeat_task_handle=nullptr;// 清空心跳任务
+                vTaskDelete(NULL);// 删除心跳任务
             }
-            delay(1000/HeartbeatFRC);// 延时
-            Heartbeat_var+=1000/HeartbeatFRC;// 增加心跳
+            delay(20);// 延时
+            Heartbeat_var+=20;// 增加心跳
         }
     }
     // 心跳控制回调
     void Heartbeat_func(data_package receive_data){
+        
+        Heartbeat_var=0;// 重置心跳
+        if(!power_output.getstate()){
+            power_output.on();// 打开电源
+        };
         if(Heartbeat_task_handle==nullptr){// 创建心跳任务
-            xTaskCreate(Heartbeat_task, "Heartbeat_task", 2048, NULL, 5, &Heartbeat_task_handle);
+            xTaskCreate(Heartbeat_task, "Heartbeat_task", 8192, NULL, 5, &Heartbeat_task_handle);
         }
         uint8_t data[8];
         memcpy(data, receive_data.data,receive_data.data_len);
@@ -61,7 +68,7 @@ namespace WIRELESSCTRL {
         if(max_err!=-1&&max_err!=Heartbeat_max_err){
             Heartbeat_max_err=max_err;
         }
-        Heartbeat_var=0;// 重置心跳
+        
     }
     // 关闭心跳控制
     void close_heartbeat(data_package receive_data){
@@ -74,9 +81,11 @@ namespace WIRELESSCTRL {
     void power_ctrl(data_package receive_data) {
         bool state = *(bool*)receive_data.data;
         if (state) {
-            power_output.on();
+            if(!power_output.getstate())
+                power_output.on();
         } else {
-            power_output.off();
+            if(power_output.getstate())
+                power_output.off();
         }
     }
     // 获取电源输出状态
