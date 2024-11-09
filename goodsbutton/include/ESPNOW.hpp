@@ -78,23 +78,16 @@ std::map<String, callback_func> callback_map;//回调函数map
 
 
 data_package re_data;//数据包缓存对象
-TaskHandle_t  callback_task_handle=nullptr;
-void callback_task(void * pvParameters ){
-  if(callback_map.count( re_data.package_name )!=0){
-    
-    callback_map[re_data.package_name](re_data);
-  }
-  callback_task_handle=nullptr;
-  vTaskDelete(NULL);
-};
+
 //接收数据时的回调函数，收到数据时自动运行
 void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
   //检查是否是数据包
   if(len<2) return;
   if(*(uint16_t*)data!=secret_key) return;
   re_data.decode((uint8_t*)data,len);
-  if(callback_task_handle==nullptr){
-    xTaskCreate(callback_task, "callback_task", 8192, NULL, 5, &callback_task_handle);
+    //检查是否是需要运行回调函数的数据包
+  if(callback_map.count( re_data.package_name )!=0){
+    callback_map[re_data.package_name](re_data);
   }
   is_conect=true;
 }
@@ -103,7 +96,7 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
 //ESP-NOW初始化
 esp_now_peer_info_t peerInfo;
 esp_now_peer_info_t  broadcastInfo;
-void esp_now_setup(uint8_t* receive_MAC=receive_MACAddress){ {
+void esp_now_setup(uint8_t* receive_MAC=receive_MACAddress){
 
   WiFi.mode(WIFI_STA);
   if (esp_now_init() != ESP_OK) {
