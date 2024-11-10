@@ -26,8 +26,7 @@ void setup() {
         digitalWrite(10,HIGH);
         int press_time=0;
         bool is_send=false;
-        while (!digitalRead(0))
-        {
+        while (!digitalRead(0)){
             delay(10);
             press_time+=10;
             if(press_time>1000&&!is_send){
@@ -56,6 +55,7 @@ void setup() {
         esp_deep_sleep_enable_gpio_wakeup(1<<GPIO_NUM_2,ESP_GPIO_WAKEUP_GPIO_HIGH);
         esp_deep_sleep_start();
     }else{
+        digitalWrite(10,HIGH);
         Serial.begin(115200);
         attachInterrupt(2, resret, FALLING);
         attachInterrupt(0,PowerCtrl::power_off,FALLING);

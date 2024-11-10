@@ -95,7 +95,6 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
 
 //ESP-NOW初始化
 esp_now_peer_info_t peerInfo;
-esp_now_peer_info_t  broadcastInfo;
 void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress){
 
   WiFi.mode(WIFI_STA);
@@ -109,9 +108,9 @@ void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress){
   esp_now_add_peer(&peerInfo);
 
   if(receive_MAC!=broadcastMacAddress){
-    broadcastInfo.ifidx = WIFI_IF_STA;
-    memcpy(broadcastInfo.peer_addr, broadcastMacAddress, 6);
-    esp_now_add_peer(&broadcastInfo);
+    peerInfo.ifidx = WIFI_IF_STA;
+    memcpy(peerInfo.peer_addr, broadcastMacAddress, 6);
+    esp_now_add_peer(&peerInfo);
   }
   esp_now_register_recv_cb(OnDataRecv);
 } 
