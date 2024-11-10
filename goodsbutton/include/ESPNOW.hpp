@@ -108,7 +108,6 @@ void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress){
   esp_now_add_peer(&peerInfo);
 
   if(receive_MAC!=broadcastMacAddress){
-    peerInfo.ifidx = WIFI_IF_STA;
     memcpy(peerInfo.peer_addr, broadcastMacAddress, 6);
     esp_now_add_peer(&peerInfo);
   }
