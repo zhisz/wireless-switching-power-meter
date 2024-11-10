@@ -104,6 +104,7 @@ namespace Battery{
 }
 void screentask( void *pvParameters ) {
   u8g2.begin();
+  PowerCtrl::send_pair_package();
   PowerCtrl::ctrl_send_data(true,10);
   while (true){
     

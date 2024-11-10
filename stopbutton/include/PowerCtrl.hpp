@@ -8,8 +8,6 @@
 #define POWERCTRL_HPP
 #include "ESPNOW.hpp"
 #include "NVSSTORAGE.hpp"
-using namespace ESPNOW;
-
 //无线急停功率计
 namespace PowerCtrl{
     void power_state_reciver(data_package receive_data);
@@ -29,7 +27,7 @@ namespace PowerCtrl{
     void send_pair_package(){
         uint8_t self_mac[6];
         WiFi.macAddress(self_mac);
-        esp_now_send_package("pair",self_mac,6,receive_MACAddress);
+        esp_now_send_package("pair",self_mac,6,broadcastMacAddress);
 
     }
     //开启功率计输出
@@ -73,10 +71,11 @@ namespace PowerCtrl{
     }
     //配对回调
     void paircallback(data_package receive_data){
-        if(receive_data.package_name=="pair"){
-            memcpy(NVSSTORAGE::pair_mac,receive_data.data,6);
-            NVSSTORAGE::NVS_save();
-        }
+        memcpy(NVSSTORAGE::pair_mac,receive_data.data,6);
+        memcpy(peerInfo.peer_addr, receive_data.data, 6);
+        esp_now_add_peer(&peerInfo);
+        NVSSTORAGE::NVS_save();
+
     }
     //接收功率数据回调函数
     void Power_data_callback(data_package receive_data){

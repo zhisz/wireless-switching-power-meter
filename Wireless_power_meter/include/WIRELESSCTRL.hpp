@@ -26,7 +26,9 @@ namespace WIRELESSCTRL {
         NVSSTORAGE::pair_mac[4]=receive_data.data[4];
         NVSSTORAGE::pair_mac[5]=receive_data.data[5];
         NVSSTORAGE::NVS_save();
-        esp_now_send_package("pair",self_Macaddress,6,receive_MACAddress);
+        memcpy(peerInfo.peer_addr, NVSSTORAGE::pair_mac, 6);
+        esp_now_add_peer(&peerInfo);
+        esp_now_send_package("pair",self_Macaddress,6,broadcastMacAddress);
     }
 
     // 心跳控制相关
