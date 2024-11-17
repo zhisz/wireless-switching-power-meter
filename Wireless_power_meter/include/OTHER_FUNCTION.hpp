@@ -29,7 +29,7 @@ namespace OTHER_FUNCTION{
     // 串口打印数据控制
     void serial_print_ctrl(bool state) {
         if (state&&serial_print_handle==nullptr) {
-            xTaskCreate(serial_print_data_task, "serial_print_data", 2048, NULL, 5, &serial_print_handle, 1);
+            xTaskCreate(serial_print_data_task, "serial_print_data", 2048, NULL, 5, &serial_print_handle);
         }else{
             if(serial_print_handle!=nullptr){
                 vTaskDelete(serial_print_handle);
@@ -54,7 +54,7 @@ namespace OTHER_FUNCTION{
     // 开关电流保护
     void current_protect_ctrl(bool state) {
         if (state&&current_protect_handle==nullptr) {
-            xTaskCreate(current_protect_task, "current_protect", 2048, NULL, 5, &current_protect_handle, 1);
+            xTaskCreate(current_protect_task, "current_protect", 2048, NULL, 5, &current_protect_handle);
         }else{
             if(current_protect_handle!=nullptr){
                 vTaskDelete(current_protect_handle);
@@ -70,7 +70,7 @@ namespace OTHER_FUNCTION{
     TaskHandle_t voltage_protect_task_handle= nullptr;
     void voltage_protect_task(void* p){
         while (true){
-            if(POWERMETER::voltage_queue.average()<voltage_protect_value){//这里求平均防止突然的大负载压降关断
+            if(POWERMETER::voltage_queue.get_average()<voltage_protect_value){//这里求平均防止突然的大负载压降关断
                 power_output.off();
             }
             delay(10);
@@ -79,7 +79,7 @@ namespace OTHER_FUNCTION{
     // 开关低压保护
     void voltage_protect_ctrl(bool state) {
         if (state&&voltage_protect_task==nullptr) {
-            xTaskCreate(voltage_protect_task, "voltage_protect", 2048, NULL, 5, &voltage_protect_task_handle, 1);
+            xTaskCreate(voltage_protect_task, "voltage_protect", 2048, NULL, 5, &voltage_protect_task_handle);
         }else{
             if(voltage_protect_task!=nullptr){
                 vTaskDelete(voltage_protect_task);
