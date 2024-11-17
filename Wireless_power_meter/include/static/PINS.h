@@ -1,6 +1,6 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 引脚定义
  * @Author: qingmeijiupiao
  * @Date: 2024-10-13 17:44:22
  */

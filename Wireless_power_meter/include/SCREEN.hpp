@@ -53,9 +53,10 @@ void sprintf_float(double value, char* buffer, int len) {
 namespace SCREEN {
     constexpr int SCREEN_HZ = 60;                 // 屏幕刷新率
     uint8_t screen_rotation = 3;                         // 屏幕旋转方向,1 OR 3
+    using page_func = std::function<void()>;
     // 页面列表
-    std::list<std::function<void()>> page_list;                    // 页面列表
-    std::list<std::function<void()>>::iterator now_page = page_list.begin(); // 当前页面
+    std::list<page_func> page_list;                    // 页面列表
+    std::list<page_func>::iterator now_page = page_list.begin(); // 当前页面
 
 
     TFT_eSPI tft = TFT_eSPI();                // 创建屏幕对象

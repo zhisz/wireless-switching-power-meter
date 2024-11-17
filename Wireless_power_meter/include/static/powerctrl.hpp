@@ -1,8 +1,8 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 输出控制相关
  * @Author: qingmeijiupiao
- * @Date: 2024-09-07 20:11:02
+ * @LastEditTime: 2024-11-17 23:36:49
  */
 #ifndef POWERCTRL_HPP
 #define POWERCTRL_HPP

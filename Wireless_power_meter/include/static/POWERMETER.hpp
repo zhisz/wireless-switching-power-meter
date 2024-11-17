@@ -1,8 +1,8 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 功率表相关部分
  * @Author: qingmeijiupiao
- * @Date: 2024-10-13 17:18:42
+ * @LastEditTime: 2024-11-17 23:36:27
  */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
@@ -15,10 +15,10 @@ namespace POWERMETER {
 
 
     INA226 PowerSensor(0x40);                 // 创建INA226传感器对象
-    double voltage = 0;                       // 电压
-    double current = 0;                       // 电流
-    double output_mah = 0;                    // 输出的毫安时
-    double output_mwh = 0;                    // 输出的毫瓦时
+    float voltage = 0;                       // 电压
+    float current = 0;                       // 电流
+    float output_mah = 0;                    // 输出的毫安时
+    float output_mwh = 0;                    // 输出的毫瓦时
     float MAX_CURRENT = 0;                    // 最大电流
     float MAX_VOLTAGE = 0;                    // 最大电压
     uint32_t last_time = millis();             // 上次读取的时间

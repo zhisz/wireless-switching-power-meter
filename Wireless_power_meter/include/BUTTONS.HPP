@@ -42,7 +42,7 @@ namespace BUTTON {
             }
         };
 
-        auto left_button_long_pressed_func = []() {
+        auto left_button_long_pressed_func = []() {// 左按键长按旋转屏幕
             if(SCREEN::screen_rotation == 3) {
                 SCREEN::screen_rotation = 1;
             }else {

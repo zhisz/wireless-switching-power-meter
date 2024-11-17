@@ -1,8 +1,8 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 定长队列
  * @Author: qingmeijiupiao
- * @Date: 2024-10-13 11:15:00
+ * @LastEditTime: 2024-11-17 23:37:28
  */
 #ifndef FixedSizeQueue_HPP
 #define FixedSizeQueue_HPP

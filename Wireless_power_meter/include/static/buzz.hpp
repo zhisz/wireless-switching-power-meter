@@ -1,9 +1,10 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: 蜂鸣器相关
  * @Author: qingmeijiupiao
- * @Date: 2024-09-07 20:20:05
+ * @LastEditTime: 2024-11-17 23:37:55
  */
+
 #ifndef BUUZZ_HPP
 #define BUUZZ_HPP
 #include <Arduino.h>
