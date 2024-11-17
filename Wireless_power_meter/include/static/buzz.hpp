@@ -15,9 +15,9 @@ class BUZZ_t {
     
     //初始化
     void setup(int pwmfrc=5000,uint8_t _pwm_channel=0,uint8_t _resolution=8) {
-        ledcAttachPin(pin, _pwm_channel);
         ledcSetup(_pwm_channel, pwmfrc, _resolution);
         ledcWrite(_pwm_channel, 0);
+        ledcAttachPin(pin, _pwm_channel);
         pwm_channel = _pwm_channel;
         resolution = _resolution;
     }
