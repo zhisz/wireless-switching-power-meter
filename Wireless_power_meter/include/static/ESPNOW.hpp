@@ -1,7 +1,8 @@
 /*
- * @Description: 
+ * @LastEditors: qingmeijiupiao
+ * @Description: HXC通用ESP-NOW库
  * @Author: qingmeijiupiao
- * @Date: 2024-05-19 14:44:23
+ * @Date: 2024-11-10 20:06:34
  */
 #ifndef esp_now_hpp
 #define esp_now_hpp
@@ -98,25 +99,40 @@ esp_now_peer_info_t peerInfo;
 void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress){
 
   WiFi.mode(WIFI_STA);
+  //WiFi.mode(WIFI_AP_STA);//理论上AP模式发射功率更大
+
   if (esp_now_init() != ESP_OK) {
       Serial.println("ESP-NOW initialization failed");
       return;
   }
 
   peerInfo.ifidx = WIFI_IF_STA;
-  memcpy(peerInfo.peer_addr, receive_MAC, 6);
-  esp_now_add_peer(&peerInfo);
+  //peerInfo.ifidx = WIFI_IF_AP; //理论上AP模式发射功率更大
 
-  if(receive_MAC!=broadcastMacAddress){
+  
+  memcpy(peerInfo.peer_addr, receive_MAC, 6);
+  esp_now_add_peer(&peerInfo);//添加对方设备MAC
+
+  if(receive_MAC!=broadcastMacAddress){//如果不是广播地址
     memcpy(peerInfo.peer_addr, broadcastMacAddress, 6);
-    esp_now_add_peer(&peerInfo);
+    esp_now_add_peer(&peerInfo);//添加广播MAC
   }
-  esp_now_register_recv_cb(OnDataRecv);
+  esp_now_register_recv_cb(OnDataRecv);//注册数据接收回调
 } 
 
 
-//通过espnow发送数据包
-void esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC=broadcastMacAddress){
+
+/**
+ * @description: 通过espnow发送数据包
+ * @return {esp_err_t} 成功返回ESP_OK 失败返回ESP_FAIL
+ * @Author: qingmeijiupiao
+ * @Date: 2024-11-17 22:55:36
+ * @param {String} name 发送数据包的名字
+ * @param {uint8_t*} data 数据数组
+ * @param {int} datalen 数据长度
+ * @param {uint8_t*} receive_MAC 接收数据的设备MAC
+ */
+esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC=broadcastMacAddress){
   data_package send_data;
   send_data.add_name(name);
   send_data.add_data(data,datalen);
@@ -125,9 +141,10 @@ void esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive
   //发送
   for(int i=0;i<MAX_RETRY;i++){
     auto err = esp_now_send(receive_MAC,send_data_array,send_data.get_len());
-    if (err == ESP_OK)  break;
+    if (err == ESP_OK) return ESP_OK;
     delay(20);
   }
+  return ESP_FAIL;
 }
 
 #endif
