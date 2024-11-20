@@ -94,7 +94,7 @@ void setup() {
     /*↓↓↓↓↓↓↓初始化相关外设↓↓↓↓↓↓↓*/
     Temperature_sensor.setup();//温度传感器初始化
     power_output.setup();//电源控制初始化
-    power_output.off();//插电默认关闭电源
+    power_output.on();//插电默认关闭电源
     buzz.setup();//蜂鸣器初始化
     NVSSTORAGE::NVS_read(); // 读取nvs存储
 

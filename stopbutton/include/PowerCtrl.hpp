@@ -10,7 +10,7 @@
 #include "NVSSTORAGE.hpp"
 //无线急停功率计
 namespace PowerCtrl{
-    void power_state_reciver(data_package receive_data);
+    void power_state_reciver(HXC_ESPNOW_data_pakage receive_data);
     static bool state = false;
     static bool is_new_data=false;
     //功率数据结构
@@ -64,13 +64,13 @@ namespace PowerCtrl{
         esp_now_send_package("send_data_ctrl",data,sizeof(bool)+sizeof(int),NVSSTORAGE::pair_mac);
     }
     //功率状态回调
-    void power_state_reciver(data_package receive_data){
+    void power_state_reciver(HXC_ESPNOW_data_pakage receive_data){
         bool _state = *(bool*)receive_data.data;
         PowerCtrl::state = _state;
         PowerCtrl::is_new_data = true;
     }
     //配对回调
-    void paircallback(data_package receive_data){
+    void paircallback(HXC_ESPNOW_data_pakage receive_data){
         memcpy(NVSSTORAGE::pair_mac,receive_data.data,6);
         memcpy(peerInfo.peer_addr, receive_data.data, 6);
         esp_now_add_peer(&peerInfo);
@@ -78,7 +78,7 @@ namespace PowerCtrl{
 
     }
     //接收功率数据回调函数
-    void Power_data_callback(data_package receive_data){
+    void Power_data_callback(HXC_ESPNOW_data_pakage receive_data){
         memcpy(&power_data,receive_data.data,sizeof(Power_data_t));
     }
     //发送心跳包
@@ -91,9 +91,9 @@ namespace PowerCtrl{
     //初始化
     void setup(){
         esp_now_setup(NVSSTORAGE::pair_mac);
-        callback_map["Power_state"]=power_state_reciver;
-        callback_map["pair"]=paircallback;
-        callback_map["Power_data"]=Power_data_callback;
+        add_esp_now_callback("power_state",power_state_reciver);
+        add_esp_now_callback("pair",paircallback);
+        add_esp_now_callback("Power_data",Power_data_callback);
     }
 
 };

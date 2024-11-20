@@ -17,7 +17,7 @@ uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地�
 // 远程控制相关
 namespace WIRELESSCTRL {
     
-    void pair_func(data_package receive_data){
+    void pair_func(HXC_ESPNOW_data_pakage receive_data){
 
         NVSSTORAGE::pair_mac[0]=receive_data.data[0];
         NVSSTORAGE::pair_mac[1]=receive_data.data[1];
@@ -51,7 +51,7 @@ namespace WIRELESSCTRL {
         }
     }
     // 心跳控制回调
-    void Heartbeat_func(data_package receive_data){
+    void Heartbeat_func(HXC_ESPNOW_data_pakage receive_data){
         
         Heartbeat_var=0;// 重置心跳
         if(!power_output.getstate()){
@@ -73,14 +73,14 @@ namespace WIRELESSCTRL {
         
     }
     // 关闭心跳控制
-    void close_heartbeat(data_package receive_data){
+    void close_heartbeat(HXC_ESPNOW_data_pakage receive_data){
         if(Heartbeat_task_handle!=nullptr){
             vTaskDelete(Heartbeat_task_handle);
             Heartbeat_task_handle = nullptr;
         }
     }
     // 电源主动控制
-    void power_ctrl(data_package receive_data) {
+    void power_ctrl(HXC_ESPNOW_data_pakage receive_data) {
         bool state = *(bool*)receive_data.data;
         if (state) {
             if(!power_output.getstate())
@@ -91,7 +91,7 @@ namespace WIRELESSCTRL {
         }
     }
     // 获取电源输出状态
-    void send_power_state(data_package receive_data) {
+    void send_power_state(HXC_ESPNOW_data_pakage receive_data) {
         bool state=power_output.getstate();
         esp_now_send_package("Power_state",(uint8_t*)(&state),1,NVSSTORAGE::pair_mac);
     }
@@ -124,7 +124,7 @@ namespace WIRELESSCTRL {
         }
     }
     // 控制发送
-    void send_data_ctrl(data_package receive_data) {
+    void send_data_ctrl(HXC_ESPNOW_data_pakage receive_data) {
         uint8_t data[5];
         memcpy(data, receive_data.data,receive_data.data_len);
         bool is_continue = *(bool*)data;
@@ -158,13 +158,13 @@ namespace WIRELESSCTRL {
         WiFi.macAddress(self_Macaddress);// 获取自己的mac
         esp_now_setup(NVSSTORAGE::pair_mac);// ESP-NOW初始化
         // 注册回调函数
-        callback_map["Heartbeatpackage"]=Heartbeat_func;
-        callback_map["pair"]=pair_func;
-        callback_map["close_heartbeat"]=close_heartbeat;
-        callback_map["power_ctrl"]=power_ctrl;
-        callback_map["get_power_state"]=send_power_state;
-        callback_map["send_data_ctrl"]=send_data_ctrl;
-        
+        add_esp_now_callback("Heartbeatpackage",Heartbeat_func);
+        add_esp_now_callback("pair",pair_func);
+        add_esp_now_callback("close_heartbeat",close_heartbeat);
+        add_esp_now_callback("power_ctrl",power_ctrl);
+        add_esp_now_callback("get_power_state",send_power_state);
+        add_esp_now_callback("send_data_ctrl",send_data_ctrl);
+
     }
 
 }

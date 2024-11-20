@@ -59,7 +59,9 @@ void setup() {
         Serial.begin(115200);
         attachInterrupt(2, resret, FALLING);
         attachInterrupt(0,PowerCtrl::power_off,FALLING);
+        
         PowerCtrl::send_pair_package();
+
         PowerCtrl::ctrl_send_data(true,50);
         
     }
