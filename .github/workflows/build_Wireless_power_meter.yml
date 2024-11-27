@@ -15,5 +15,5 @@ jobs:
 
     - name: Build   # 构建项目
       run: |
-        cd /Wireless_power_meter
+        cd ./Wireless_power_meter
         pio run
