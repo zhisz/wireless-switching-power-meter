@@ -15,10 +15,14 @@ jobs:
 
     - name: Build PlatformIO project  # 构建PlatformIO项目
       run: |
-        for env in Wireless_power_meter stopbutton goodsbutton; do
-          pio run -e $env
+        projects=("Wireless_power_meter" "stopbutton" "goodsbutton")
+        for project in "${projects[@]}"; do
+          echo "Building $project"
+          cd /root/$project
+          pio run
           if [ $? -ne 0 ]; then
-            echo "Build failed for $env"
+            echo "Build failed for $project"
             exit 1
           fi
+          cd -  # 返回到原始目录
         done
