@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-20 11:15:38
+ * @LastEditTime: 2024-11-27 22:44:02
  */
 
 #ifndef esp_now_hpp
@@ -19,7 +19,7 @@
 //发送数据包失败最大重试次数
 #define MAX_RETRY 5
 
-//数据包密钥
+//数据包密钥,请确保和接收端保持一致
 constexpr uint16_t secret_key=0xFEFE;
 
 //广播地址

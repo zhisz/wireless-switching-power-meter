@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-17 23:46:00
+ * @LastEditTime: 2024-11-25 21:55:27
  */
 /*
                                               .=%@#=.
@@ -112,4 +112,7 @@ void setup() {
 }
 
 // Arduino主循环,本项目不使用
-void loop() {}
+void loop() {
+  Serial.println(WiFi.macAddress());// 获取自己的mac
+  delay(1000);
+}

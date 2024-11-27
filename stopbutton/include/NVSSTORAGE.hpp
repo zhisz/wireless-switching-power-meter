@@ -1,6 +1,6 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 
+ * @Description: NVS数据存储,将配对的mac存储在NVS中重启后读,确保配对信息不丢失
  * @Author: qingmeijiupiao
  * @Date: 2024-10-13 17:21:48
  */
