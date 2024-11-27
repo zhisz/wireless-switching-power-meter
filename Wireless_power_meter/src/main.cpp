@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-25 21:55:27
+ * @LastEditTime: 2024-11-27 23:30:00
  */
 /*
                                               .=%@#=.
