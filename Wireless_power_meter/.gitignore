@@ -3,4 +3,4 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-!.pio/libdeps/esp32-c3-devkitc-02/TFT_eSPI
+!.pio/libdeps/Wireless_power_meter/TFT_eSPI
