@@ -23,7 +23,5 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')  # 如果是标签推送，则执行Release操作
       with:
         files: stopbutton/.pio/build/stopbutton/stopbutton_4MB.bin  # 上传的文件路径
-        body: |
-          ### 急停开关固件
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用GitHub提供的token

@@ -23,7 +23,5 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')  # 如果是标签推送，则执行Release操作
       with:
         files: goodsbutton/.pio/build/goodsbutton/goodsbutton_4MB.bin  # 上传的文件路径
-        body: |
-          ### mini开关固件
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用GitHub提供的token
