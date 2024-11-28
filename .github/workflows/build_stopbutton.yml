@@ -3,9 +3,10 @@ name: Build stopbutton
 on: [push]  # 触发条件，这里是代码被推送到仓库时
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest  # 运行环境，这里是最新的Ubuntu系统
-
+    permissions:
+      contents: write
     steps:
     - name: Checkout code  # 检出代码
       uses: actions/checkout@v2
