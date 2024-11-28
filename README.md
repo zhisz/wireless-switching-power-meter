@@ -18,18 +18,19 @@ https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 
 [esp下载工具链接](https://www.espressif.com/zh-hans/support/download/other-tools)
 
-下载解压后打开工具
+## 下载解压后打开工具
 
 ![image](https://github.com/user-attachments/assets/9eddfbf2-39a3-4faf-9804-68ef2b215977)
 
-选择 ESP32-C3和USB烧录
+## 选择 ESP32-C3和USB烧录
 
 ![image](https://github.com/user-attachments/assets/dd5756dd-e65b-41c0-9ebf-b2a14caf6c09)
 ![image](https://github.com/user-attachments/assets/3c837e4c-2ff2-4a40-8a6a-0984921df3d5)
 
-点击三个小点选择在github release处下载的.bin文件
+## 点击三个小点选择在github release处下载的.bin文件
 
 ![image](https://github.com/user-attachments/assets/69aea8b0-c27d-409c-8d56-fd5c31565108)
 
-之后如图设置烧录
+## 之后如图设置烧录
+
 ![image](https://github.com/user-attachments/assets/e8f50ed6-1cc7-48f5-b483-b88221737867)
