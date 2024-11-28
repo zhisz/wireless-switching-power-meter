@@ -27,7 +27,7 @@ https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 ![image](https://github.com/user-attachments/assets/dd5756dd-e65b-41c0-9ebf-b2a14caf6c09)
 ![image](https://github.com/user-attachments/assets/3c837e4c-2ff2-4a40-8a6a-0984921df3d5)
 
-## 点击三个小点选择在github release处下载的.bin文件
+## 点击三个小点选择在[github release](https://github.com/CQUPTHXC/wireless-switching-power-meter/releases)处下载的.bin文件
 
 ![image](https://github.com/user-attachments/assets/69aea8b0-c27d-409c-8d56-fd5c31565108)
 
