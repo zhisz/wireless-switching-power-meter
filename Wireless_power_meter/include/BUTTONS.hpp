@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 按键相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-28 00:02:03
+ * @LastEditTime: 2024-11-28 12:24:01
  */
 
 #ifndef BUTTONS_HPP
@@ -10,6 +10,7 @@
 #include "static/PINS.h"
 #include "OneButton.h"
 #include "SCREEN.hpp"
+#include "static/HXCthread.hpp"
 OneButton right_button(BUT1, true);           // 右按键
 OneButton big_button(BUT2, true);             // 大按键
 OneButton left_button(BUT3, true);            // 左按键
@@ -18,8 +19,9 @@ OneButton left_button(BUT3, true);            // 左按键
 // 按键控制相关
 namespace BUTTON {
     constexpr int BUTTON_tick_frc=100; // 按键检测频率 HZ
-    // 按键任务
-    void button_task(void * pvParameters) {
+
+    // 按键初始化
+    void setup(){
         pinMode(BUT1, INPUT_PULLUP);                               // 设置按键为上拉输入模式
         pinMode(BUT2, INPUT_PULLUP);
         pinMode(BUT3, INPUT_PULLUP);
@@ -71,14 +73,17 @@ namespace BUTTON {
         left_button.setLongPressIntervalMs(1000);
 
         right_button.attachClick(right_button_pressed_func); // 右按键点击切换页面
-
+    }
+    // 按键任务
+    HXC::thread<void> button_detect_thread([]{
+        BUTTON::setup();
         while (true) {
             left_button.tick(); // 检测按键状态
             right_button.tick();
             big_button.tick();
             delay(1000/BUTTON_tick_frc); // 控制检测频率
         }
-    }
+    });
 }
 
 

@@ -429,9 +429,9 @@ namespace SCREEN {
 
     /*↑↑↑↑↑↑↑↑↑页面函数区域↑↑↑↑↑↑↑↑↑*/
 
-    // 屏幕更新任务
-    void updatescreen(void * pvParameters) {
 
+    // 初始化
+    void setup() {
         tft.init();                                                // 初始化屏幕
         tft.setRotation(screen_rotation);                          // 设置屏幕方向
         tft.fillScreen(TFT_BLACK);                                 // 清空屏幕
@@ -474,19 +474,23 @@ namespace SCREEN {
             // tft.endWrite();
             // delay(2000);
 
-        };print_start_img();
-
-        
+        };print_start_img();// 调用LOGO绘制函数
+    }
+    // 屏幕更新任务
+    HXC::thread<void> updatescreen_thread([]() {
+        SCREEN::setup();
         while (true) {
             tft.startWrite();
             clk.fillSprite(TFT_BLACK);                             // 清空缓冲区
+
             now_page->operator()();                                // 调用当前页面的绘制函数
+
             clk.drawRoundRect(0, 0, 240, 135, 0, border_color);      // 绘制矩形边框
             clk.pushSprite(0, 0);                                  // 将缓冲区内容推送到屏幕
             tft.endWrite();                                        // 结束写入
             delay(1000 / SCREEN_HZ);                               // 控制刷新率
         }
-    }
+    });
 }
 
 #endif

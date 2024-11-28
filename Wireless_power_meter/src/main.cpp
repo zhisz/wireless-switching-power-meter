@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-27 23:30:00
+ * @LastEditTime: 2024-11-28 12:35:09
  */
 /*
                                               .=%@#=.
@@ -102,17 +102,14 @@ void setup() {
 
 
     /*↓↓↓↓↓↓↓创建后台任务↓↓↓↓↓↓↓*/
-    xTaskCreate(BUTTON::button_task, "button_task", 512, NULL, 5, NULL); // 按键任务
-    xTaskCreate(POWERMETER::updatePower, "updatePower", 2048, NULL, 5, NULL);// 电压电流更新任务
-    xTaskCreate(SCREEN::updatescreen, "updatescreen", 8192, NULL, 5, NULL);// 屏幕更新任务
-
+    BUTTON::button_detect_thread.start("button_detect",/*stacksize=*/512);// 按键任务
+    POWERMETER::updatePower_thread.start("updatePower");// 电压电流更新任务
+    SCREEN::updatescreen_thread.start("updatescreen",/*stacksize=*/8192);// 屏幕更新任务
     /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/
+
     delay(2000);// 延时防止重启
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
 }
 
 // Arduino主循环,本项目不使用
-void loop() {
-  Serial.println(WiFi.macAddress());// 获取自己的mac
-  delay(1000);
-}
+void loop() {}

@@ -2,12 +2,13 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 功率表相关部分
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-17 23:36:27
+ * @LastEditTime: 2024-11-28 12:29:43
  */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
 #include "INA226.h"
 #include "FixedSizeQueue.hpp"
+#include "static/HXCthread.hpp"
 // 输入电压电流读取相关
 namespace POWERMETER {
     constexpr int READ_HZ = 100;                  // 读取电压电流的频率
@@ -25,13 +26,19 @@ namespace POWERMETER {
     FixedSizeQueue<float,READ_HZ*data_save_time> voltage_queue;         // 电压队列
     FixedSizeQueue<float,READ_HZ*data_save_time> current_queue;         // 电流队列
     FixedSizeQueue<float,READ_HZ*data_save_time> power_queue;         // 功率队列
-    // 更新电压电流的任务
-    void updatePower(void * pvParameters ) {
+    // 初始化
+    void setup(){
         Wire.setPins(5, 4);                   // 设置I2C引脚
         Wire.begin();                         // 初始化I2C
         if (!PowerSensor.begin()) {           // 检查INA226是否连接
             Serial.println("INA226 sensor not found!");
         }
+    };
+
+    // 更新电压电流的任务
+    HXC::thread<void> updatePower_thread([]() {
+        // 初始化
+        POWERMETER::setup();
         while (true) {
             voltage = PowerSensor.getBusVoltage(); // 读取电压
             uint16_t row_data = PowerSensor.getRegister(1); // 读取寄存器中的电流数据
@@ -58,6 +65,6 @@ namespace POWERMETER {
 
             delay(1000 / READ_HZ);             // 延时，保持读取频率
         }
-    }
+    });
 }
 #endif
