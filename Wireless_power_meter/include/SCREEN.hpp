@@ -18,10 +18,10 @@
 #include "WIRELESSCTRL.hpp"
 #include "static/TemperatureSensor.hpp"
 
-#include "pic/wifi_img.hpp"
-#include "pic/robocon_img.hpp"
-#include "pic/CQUPTHXC_img.hpp"
-#include "pic/JLC_LOGO.hpp"
+#include "img/wifi_img.hpp"
+#include "img/robocon_img.hpp"
+#include "img/CQUPTHXC_img.hpp"
+#include "img/JLC_LOGO.hpp"
 extern TemperatureSensor_t Temperature_sensor; 
 extern POWERCTRL_t power_output;
 

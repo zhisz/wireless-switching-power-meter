@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-28 12:35:09
+ * @LastEditTime: 2024-11-28 12:49:28
  */
 /*
                                               .=%@#=.
@@ -86,6 +86,7 @@
 POWERCTRL_t power_output(PowerPin);           // 电源控制
 TemperatureSensor_t Temperature_sensor;       // 温度传感器
 BUZZ_t buzz(BUZZER_PIN);                      // 蜂鸣器
+
 
 // 初始化程序
 void setup() {
