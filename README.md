@@ -32,5 +32,6 @@ https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 ![image](https://github.com/user-attachments/assets/69aea8b0-c27d-409c-8d56-fd5c31565108)
 
 ## 之后如图设置烧录
+烧录前需要先将esp32进入烧录模式，即：按住boot按钮再让芯片启动，电脑能够显示端口就算成功
 
 ![image](https://github.com/user-attachments/assets/e8f50ed6-1cc7-48f5-b483-b88221737867)
