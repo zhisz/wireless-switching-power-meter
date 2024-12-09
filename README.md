@@ -8,10 +8,26 @@ https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 本项目采用PlatformIO IDE + Arduino 框架开发
 使用vscode安装PlatformIO后打开代码文件夹即可编译运行
 注意不可直接打开根目录，只能打开项目文件夹否则PlatformIO无法识别
+
 # 文件介绍
 - Wireless_power_meter ：功率计本体代码
 - goodsbutton ：mini开关代码
 - stopbutton ：急停开关代码
+
+# 功能介绍
+## 功率计本体
+    短按大按钮：关闭
+    长按大按钮：开启
+    侧面按键：翻页
+    长按左边的侧边按键：屏幕翻转180°
+## 急停开关
+
+    拍下大按钮：急停
+    恢复大按钮：恢复
+## mini开关
+    短按：关闭
+    长按2s：开启
+    长按10：发送配对包
 
 # 固件烧录
 如果不想搭建开发环境也可以选择直接烧录固件
