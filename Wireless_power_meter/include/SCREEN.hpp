@@ -12,7 +12,7 @@
 #include <list> 
 
 
-#include "NVSSTORAGE.hpp"
+#include "static/NVSSTORAGE.hpp"
 #include "static/POWERMETER.hpp"
 #include "static/powerctrl.hpp"
 #include "WIRELESSCTRL.hpp"

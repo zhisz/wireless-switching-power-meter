@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-03 16:01:37
+ * @LastEditTime: 2024-12-09 16:56:56
  */
 /*
                                               .=%@#=.
@@ -81,12 +81,11 @@
 #include "WIRELESSCTRL.hpp"// 无线控制
 #include "BUTTONS.hpp"// 按键
 #include "SCREEN.hpp"// 屏幕
-
+#include "shell.hpp"// 串口命令行
 // 初始化各种模块
 POWERCTRL_t power_output(PowerPin);           // 电源控制
 TemperatureSensor_t Temperature_sensor;       // 温度传感器
 BUZZ_t buzz(BUZZER_PIN);                      // 蜂鸣器
-
 
 // 初始化程序
 void setup() {
@@ -99,6 +98,7 @@ void setup() {
     buzz.setup();//蜂鸣器初始化
     NVSSTORAGE::NVS_read(); // 读取nvs存储
 
+
     /*初始化相关外设*/
 
 
@@ -106,10 +106,12 @@ void setup() {
     BUTTON::button_detect_thread.start("button_detect",/*stacksize=*/512);// 按键任务
     POWERMETER::updatePower_thread.start("updatePower");// 电压电流更新任务
     SCREEN::updatescreen_thread.start("updatescreen",/*stacksize=*/8192);// 屏幕更新任务
+    SHELL::shell_thread.start("shell",/*stacksize=*/2048);// 串口命令行任务
     /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/
 
     delay(2000);// 延时防止重启
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
+    shell.execute("hello shell");
 }
 
 // Arduino主循环,本项目不使用

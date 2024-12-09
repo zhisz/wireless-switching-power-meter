@@ -2,19 +2,18 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 功率表相关部分
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-28 12:29:43
+ * @LastEditTime: 2024-12-09 17:23:43
  */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
 #include "INA226.h"
 #include "FixedSizeQueue.hpp"
 #include "static/HXCthread.hpp"
+#include "NVSSTORAGE.hpp"
 // 输入电压电流读取相关
 namespace POWERMETER {
     constexpr int READ_HZ = 100;                  // 读取电压电流的频率
-    constexpr int data_save_time=3;              // 保存数据的时间 秒
-
-
+    constexpr int data_save_time=10;              // 保存数据的时间 秒
     INA226 PowerSensor(0x40);                 // 创建INA226传感器对象
     float voltage = 0;                       // 电压
     float current = 0;                       // 电流
@@ -47,7 +46,8 @@ namespace POWERMETER {
             // 处理电流数据
             int16_t data = *(int16_t*)&row_data;
             data = data > 0 ? data : -data;
-            current = double(data) * 1e-3;     // 转换电流数据
+
+            current = double(data) *NVSSTORAGE::sample_resistance* 5e-4;     // 转换电流数据
             // 更新最大电压和最大电流
             if (voltage > MAX_VOLTAGE) MAX_VOLTAGE = voltage;
             if (current > MAX_CURRENT) MAX_CURRENT = current;

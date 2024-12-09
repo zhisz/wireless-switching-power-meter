@@ -10,7 +10,7 @@
 #include <Arduino.h>
 #include "static/POWERMETER.hpp"
 #include "static/powerctrl.hpp"
-#include "NVSSTORAGE.hpp"
+#include "static/NVSSTORAGE.hpp"
 #include "static/ESPNOW.hpp"
 extern POWERCTRL_t power_output;
 uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地址,初始化为广播地址
@@ -18,13 +18,8 @@ uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地�
 namespace WIRELESSCTRL {
     
     void pair_func(HXC_ESPNOW_data_pakage receive_data){
-
-        NVSSTORAGE::pair_mac[0]=receive_data.data[0];
-        NVSSTORAGE::pair_mac[1]=receive_data.data[1];
-        NVSSTORAGE::pair_mac[2]=receive_data.data[2];
-        NVSSTORAGE::pair_mac[3]=receive_data.data[3];
-        NVSSTORAGE::pair_mac[4]=receive_data.data[4];
-        NVSSTORAGE::pair_mac[5]=receive_data.data[5];
+        
+        NVSSTORAGE::pair_mac=receive_data.data;
         NVSSTORAGE::NVS_save();
         memcpy(peerInfo.peer_addr, NVSSTORAGE::pair_mac, 6);
         esp_now_add_peer(&peerInfo);

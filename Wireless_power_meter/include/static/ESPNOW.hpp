@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-09 16:29:06
+ * @LastEditTime: 2024-12-09 17:07:44
  */
 
 #ifndef esp_now_hpp
