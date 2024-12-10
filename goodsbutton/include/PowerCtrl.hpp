@@ -7,9 +7,12 @@
 #ifndef POWERCTRL_HPP
 #define POWERCTRL_HPP
 #include "ESPNOW.hpp"
-#include "NVSSTORAGE.hpp"
+#include "HXC_NVS.hpp"
+
 //无线急停功率计
 namespace PowerCtrl{
+    //NVS数据，存储配对的MAC地址
+    HXC::NVS_DATA<MAC_t>pair_mac("pair_mac",MAC_t(0XFF,0XFF,0XFF,0XFF,0XFF,0XFF));
     void power_state_reciver(HXC_ESPNOW_data_pakage receive_data);
     static bool state = false;
     static bool is_new_data=false;
@@ -33,16 +36,16 @@ namespace PowerCtrl{
     //开启功率计输出
     void power_on(){
         bool state = true;
-        esp_now_send_package("power_ctrl",(uint8_t*)(&state),1,NVSSTORAGE::pair_mac);
+        esp_now_send_package("power_ctrl",(uint8_t*)(&state),1,pair_mac);
     };
     //关闭功率计输出
     void power_off(){
         bool state = false;
-        esp_now_send_package("power_ctrl",(uint8_t*)(&state),1,NVSSTORAGE::pair_mac);
+        esp_now_send_package("power_ctrl",(uint8_t*)(&state),1,pair_mac);
     };
     //获取功率计开关状态
     bool getstate(){
-        esp_now_send_package("get_power_state",nullptr,0,NVSSTORAGE::pair_mac);
+        esp_now_send_package("get_power_state",nullptr,0,pair_mac);
         int max_delay = 300;//最大等待时间（ms）
         while(!is_new_data){
             max_delay--;
@@ -61,7 +64,7 @@ namespace PowerCtrl{
         uint8_t data[5];
         data[0] = state;
         memcpy(data+1,&_frc,sizeof(int));
-        esp_now_send_package("send_data_ctrl",data,sizeof(bool)+sizeof(int),NVSSTORAGE::pair_mac);
+        esp_now_send_package("send_data_ctrl",data,sizeof(bool)+sizeof(int),pair_mac);
     }
     //功率状态回调
     void power_state_reciver(HXC_ESPNOW_data_pakage receive_data){
@@ -71,11 +74,9 @@ namespace PowerCtrl{
     }
     //配对回调
     void paircallback(HXC_ESPNOW_data_pakage receive_data){
-        memcpy(NVSSTORAGE::pair_mac,receive_data.data,6);
-        memcpy(peerInfo.peer_addr, receive_data.data, 6);
-        esp_now_add_peer(&peerInfo);
-        NVSSTORAGE::NVS_save();
-
+        add_esp_now_peer_mac(receive_data.data);
+        //保存数据到NVS
+        pair_mac=receive_data.data;
     }
     //接收功率数据回调函数
     void Power_data_callback(HXC_ESPNOW_data_pakage receive_data){
@@ -86,11 +87,11 @@ namespace PowerCtrl{
         uint8_t data[8];
         memcpy(data,&_frc,sizeof(int));
         memcpy(data+4,&max_error,sizeof(int));
-        esp_now_send_package("Heartbeatpackage",data,sizeof(int)+sizeof(int),NVSSTORAGE::pair_mac);
+        esp_now_send_package("Heartbeatpackage",data,sizeof(int)+sizeof(int),pair_mac);
     }
     //初始化
     void setup(){
-        esp_now_setup(NVSSTORAGE::pair_mac);
+        esp_now_setup(pair_mac);
         add_esp_now_callback("Power_state",power_state_reciver);
         add_esp_now_callback("pair",paircallback);
         add_esp_now_callback("Power_data",Power_data_callback);

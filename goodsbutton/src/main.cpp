@@ -6,8 +6,6 @@
  */
 #include <Arduino.h>
 #include "PowerCtrl.hpp"
-#include "NVSSTORAGE.hpp"
-
 
 void resret(){
     ESP.restart();
@@ -18,7 +16,6 @@ void setup() {
     pinMode(10,OUTPUT);
     pinMode(2,INPUT_PULLDOWN);
     
-    NVSSTORAGE::NVS_read();
     PowerCtrl::setup();
 
     if(!digitalRead(2)){
@@ -72,6 +69,5 @@ void loop() {
     Serial.print(",");
     Serial.println(PowerCtrl::power_data.current);
     delay(10);
-
 }
 

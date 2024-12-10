@@ -1,279 +1,113 @@
 /*
  * @LastEditors: qingmeijiupiao
- * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
+ * @Description: HXC战队nvs储存系统二次封装库，用于储存变量到NVS
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-10 16:30:51
+ * @LastEditTime: 2024-12-10 16:32:06
  */
+#ifndef HXC_NVS_HPP
+#define HXC_NVS_HPP
+#include "Arduino.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 
-#ifndef esp_now_hpp
-#define esp_now_hpp
-#include <Arduino.h>
-#include <WiFi.h>
-#include <esp_wifi.h>
-#include <esp_now.h>
-#include <functional>
-#include <map>
-#include <list>
-
-//默认数据包密钥
-#define DEFAULT_SECRET_KEY 0xFEFE
-
-//发送数据包失败最大重试次数
-#define MAX_RETRY 5
+//使用HXC命名空间
+namespace HXC{
 
 
-/*↓↓↓↓声明↓↓↓↓*/
+//错误代码对应的错误信息数组
+static const char * nvs_errors[] = { "OTHER", "NOT_INITIALIZED", "NOT_FOUND", "TYPE_MISMATCH", "READ_ONLY", "NOT_ENOUGH_SPACE", "INVALID_NAME", "INVALID_HANDLE", "REMOVE_FAILED", "KEY_TOO_LONG", "PAGE_FULL", "INVALID_STATE", "INVALID_LENGTH"};
 
-//数据包结构体
-struct HXC_ESPNOW_data_pakage;
+// 用于将NVS的错误代码转换为对应的错误信息的宏
+#define nvs_error(e) (((e)>ESP_ERR_NVS_BASE)?nvs_errors[(e)&~(ESP_ERR_NVS_BASE)]:nvs_errors[0])
 
-//MAC地址结构体
-struct MAC_t{
-  uint8_t mac[6];
-  //默认构造函数
-  MAC_t(){memset(this->mac,0xFF,6);}
-  //构造函数,从6个字节构造
-  MAC_t(uint8_t mac1,uint8_t mac2,uint8_t mac3,uint8_t mac4,uint8_t mac5,uint8_t mac6){ mac[0]=mac1;mac[1]=mac2;mac[2]=mac3;mac[3]=mac4;mac[4]=mac5;mac[5]=mac6; }
-  //构造函数,从数组构造
-  MAC_t(uint8_t* mac){ memcpy(this->mac,mac,6); }
-  //索引运算符
-  uint8_t operator[](int i) { return mac[i]; }
-  //赋值运算符
-  void operator=(uint8_t* mac) { memcpy(this->mac,mac,6); }
-  //比较运算符
-  bool operator==(MAC_t other) { return memcmp(this->mac,other.mac,6)==0; }
-  //类型转换
-  operator uint8_t*() { return mac; }
-  operator const uint8_t*() const { return mac; }
-};
+//默认使用的NVS page名称
+#define NVS_NAME "HXC_ESPNOW"
 
-//广播地址
-MAC_t broadcastMacAddress(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);
-
-//回调函数
-using callback_func =std::function<void(HXC_ESPNOW_data_pakage)>;
-
-
-/**
- * @description: ESP-NOW初始化
- * @return {*}
- * @Author: qingmeijiupiao
- * @param {MAC_t} receive_MAC 接收数据的设备MAC 默认广播地址
- * @param {int} wifi_channel 使用的wifi信道 默认0
- */
-void esp_now_setup(MAC_t receive_MAC=broadcastMacAddress,int wifi_channel=0);
-
-//添加配对MAC
-void add_esp_now_peer_mac(MAC_t mac);
-
-//删除配对MAC
-void remove_esp_now_peer_mac(MAC_t mac);
-
-//检查是否是配对MAC
-bool is_esp_now_peer(MAC_t mac);
-
-
-/**
- * @description: 发送经过封装的ESP-NOW数据包
- * @return {esp_err_t} 正确返回ESP_OK
- * @Author: qingmeijiupiao
- * @param {String} name 数据包名称
- * @param {uint8_t*} data 数据
- * @param {int} datalen 数据长度
- * @param {MAC_t} receive_MAC 接收数据的设备MAC 默认广播地址
- */
-esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,MAC_t receive_MAC=broadcastMacAddress);
-
-
-/**
- * @description: 添加回调函数,回调函数会在接收到数据包时自动运行
- * @return {*}
- * @Author: qingmeijiupiao
- * @param {String} package_name 数据包名称
- * @param {callback_func} func 回调函数,可使用函数指针或者lambda
- */
-void add_esp_now_callback(String package_name,callback_func func);
-
-//移除回调函数
-void remove_esp_now_callback(String package_name);
-
-//修改数据包密钥
-void change_secret_key(uint16_t _secret_key);
-
-
-
-
-
-
-
-
-
-/*↓↓↓↓定义↓↓↓↓*/
-
-//数据包密钥
-static uint16_t secret_key=DEFAULT_SECRET_KEY;
-
-//数据包格式
-struct HXC_ESPNOW_data_pakage {
-  uint16_t header_code=secret_key;//数据包头,作为密钥使用
-  uint8_t name_len;
-  uint8_t data_len;
-  String package_name;
-  uint8_t data[256];
-  //添加名字
-  void add_name(String _name){
-    package_name=_name;
-    name_len=package_name.length();
-  }
-  //添加数据
-  void add_data(uint8_t* _data,int _datalen){
-    data_len=_datalen;
-    for(int i=0;i<_datalen;i++){
-      data[i]=_data[i];
+template<typename Value_type>
+class NVS_DATA{
+public:
+    // 构造函数，初始化key和默认值
+    NVS_DATA(String _key,Value_type default_value){
+        if(_key.length()>15){
+            log_e("nvs key too long: %s", key.c_str());
+            _key=_key.substring(0,15);
+        }
+        this->key=_key;
+        this->value=default_value;
     }
-  }
-  //获取数据
-  void get_data(uint8_t* _data){
-    _data[0]=header_code/256;
-    _data[1]=header_code%256;
-    _data[2]=package_name.length();
-    _data[3]=data_len;
-    memcpy(_data+4,package_name.c_str(),package_name.length());
-    memcpy(_data+4+package_name.length(),data,data_len);
-  }
+    ~NVS_DATA(){}
+    // 保存数据到NVS的方法
+    esp_err_t save(){
+        if(!is_setup){setup();} // 如果未初始化，则先初始化
 
-  //解码数组到结构体对象
-  void decode(uint8_t* _data,int _datalen){
-    header_code=_data[0]+_data[1]*256;
-    name_len=_data[2];
-    data_len=_data[3];
-    package_name="";
-    for(int i=0;i<name_len;i++){
-      package_name+=char(_data[4+i]);
+        esp_err_t err = nvs_set_blob(_handle, key.c_str(), (const void*)&value, sizeof(Value_type)); // 将数据写入NVS
+        if(err){
+            log_e("nvs_set_blob fail: %s %s", key.c_str(), nvs_error(err)); // 如果写入失败，记录错误信息
+        }
+        err = nvs_commit(_handle); // 提交写入操作
+        if(err){
+            log_e("nvs_commit fail: %s %s", key.c_str(), nvs_error(err)); // 如果提交失败，记录错误信息
+        }
+        return err; // 返回操作结果
     }
-    for(int i=0;i<data_len;i++){
-      data[i]=_data[4+name_len+i];
+
+    // 从NVS读取数据的方法
+    Value_type read(){
+        if(!is_setup){setup();} // 如果未初始化，则先初始化
+        if(is_read) return value; // 如果已经读取过，则直接返回缓存的值
+        size_t datalen = 0;
+        esp_err_t err = nvs_get_blob(_handle, key.c_str(), NULL, &datalen); // 获取数据长度
+        if(err!=ESP_OK || datalen!=sizeof(Value_type)){
+            log_e("nvs_get_blob len fail: %s %s", key, nvs_error(err)); // 如果获取长度失败，记录错误信息
+            is_read=true;
+            return value; // 返回默认值
+        }
+        err = nvs_get_blob(_handle, key.c_str(), (void*)&value, &datalen); // 读取数据
+        if(err){
+            log_e("nvs_get_blob fail: %s %s", key.c_str(), nvs_error(err)); // 如果读取失败，记录错误信息
+            return value; // 返回默认值
+        }
+        is_read=true; // 标记为已读取
+        return value; // 返回读取的值
     }
-  }
-  //获取数据包长度
-  int get_len(){
-    return 4+name_len+data_len;
-  }
 
+    // 重载赋值运算符，用于更新NVS中的数据
+    NVS_DATA& operator=(const Value_type& newValue) {
+        value = newValue;
+        save(); // 保存到NVS
+        return *this;
+    }
+
+    // 重载隐式类型转换运算符，用于获取NVS中的数据
+    operator Value_type() {
+        return read(); // 读取NVS中的值
+    }
+
+protected:
+    // 静态方法，用于初始化NVS
+    static void setup(){
+        if(is_setup) return; // 如果已经初始化，则直接返回
+        auto err= nvs_open(NVS_NAME,NVS_READWRITE, &_handle); // 打开NVS命名空间
+        if(err!=ESP_OK){
+            log_e("nvs_open failed: %s", nvs_error(err)); // 如果打开失败，记录错误信息
+            return;
+        };
+        is_setup=true; // 标记为已初始化
+    }
+    String key; // 存储NVS中的key
+    static uint32_t _handle; // 存储NVS的句柄
+    static bool is_setup; // 标记是否已经初始化
+    bool is_read=false; // 标记是否已经读取过数据
+    Value_type value; // 存储数据的值
 };
+// 初始化类的静态成员变量
+template<typename Value_type>
+bool NVS_DATA<Value_type>::is_setup=false;
 
+template<typename Value_type>
+uint32_t NVS_DATA<Value_type>::_handle=0;
 
-static std::list<MAC_t> peer_mac_list;//配对MAC地址列表
-
-static std::map<String, callback_func> callback_map;//回调函数map
-
-//添加回调函数
-void add_esp_now_callback(String package_name,callback_func func){
-  callback_map[package_name]=func;
 }
-
-//移除回调函数
-void remove_esp_now_callback(String package_name){
-  callback_map.erase(package_name);
-};
-
-static HXC_ESPNOW_data_pakage re_data;//数据包缓存对象
-
-//是否连接的标志
-bool is_conect=false;
-
-//接收数据时的回调函数，收到数据时自动运行
-void OnESPNOWDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
-  //检查是否是数据包
-  if(len<4) return;
-  if(*(uint16_t*)data!=secret_key) return;
-  re_data.decode((uint8_t*)data,len);
-    //检查是否是需要运行回调函数的数据包
-  if(callback_map.count( re_data.package_name )!=0){
-    callback_map[re_data.package_name](re_data);
-  }
-  is_conect=true;
-}
-
-//配对信息对象
-static esp_now_peer_info_t peerInfo;
-
-//是否初始化的标志
-static bool is_setup=false;
-
-//ESP-NOW初始化
-void esp_now_setup(MAC_t receive_MAC,int wifi_channel){
-  
-  if(is_setup) return;
-  is_setup=true;
-
-  WiFi.mode(WIFI_STA);
-  if (esp_now_init() != ESP_OK) {
-      Serial.println("ESP-NOW initialization failed");
-      return;
-  }
-  if(wifi_channel!=0){
-    peerInfo.channel = wifi_channel;
-  }
-  peerInfo.ifidx = WIFI_IF_STA;
-  memcpy(peerInfo.peer_addr, receive_MAC, 6);
-  peer_mac_list.push_back(receive_MAC);
-  esp_now_add_peer(&peerInfo);
-
-  if(receive_MAC!=broadcastMacAddress){
-    memcpy(peerInfo.peer_addr, broadcastMacAddress, 6);
-    esp_now_add_peer(&peerInfo);
-  }
-  esp_now_register_recv_cb(OnESPNOWDataRecv);
-} 
-
-//添加配对MAC
-void add_esp_now_peer_mac(MAC_t mac){
-  memcpy(peerInfo.peer_addr, mac, 6);
-  peer_mac_list.push_back(mac);
-  esp_now_add_peer(&peerInfo);
-};
-
-//删除配对MAC
-void remove_esp_now_peer_mac(MAC_t mac){
-  peer_mac_list.remove(mac);
-  esp_now_del_peer(mac);
-};
-
-//检查是否是配对MAC
-bool is_esp_now_peer(MAC_t mac){
-
-  //检查是否是配对MAC
-  auto item=std::find(peer_mac_list.begin(),peer_mac_list.end(),mac);
-
-  //没有找到
-  if(item==peer_mac_list.end()) return false;
-
-  //找到了
-  return true;
-}
-
-//通过espnow发送数据包
-esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,MAC_t receive_MAC){
-  HXC_ESPNOW_data_pakage send_data;
-  send_data.add_name(name);
-  send_data.add_data(data,datalen);
-  uint8_t send_data_array[send_data.get_len()];
-  send_data.get_data(send_data_array);
-  //发送
-  for(int i=0;i<MAX_RETRY;i++){
-    auto err = esp_now_send(receive_MAC,send_data_array,send_data.get_len());
-    if (err == ESP_OK)  return ESP_OK;
-    delay(20);
-  }
-  return ESP_FAIL;
-}
-
-//修改数据包密钥
-void change_secret_key(uint16_t _secret_key){
-  secret_key=_secret_key;
-}
-
 #endif
 /*
                                               .=%@#=.                                               

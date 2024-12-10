@@ -168,9 +168,6 @@ void setup()
   Serial.begin(115200);
   pinMode(buttonPIN, INPUT_PULLUP);
 
-  // NVS读取配对的mac
-  NVSSTORAGE::NVS_read();
-
   // 功率计远程控制初始化
   PowerCtrl::setup();
 
