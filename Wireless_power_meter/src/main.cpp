@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-09 16:56:56
+ * @LastEditTime: 2024-12-10 16:11:00
  */
 /*
                                               .=%@#=.
@@ -96,8 +96,6 @@ void setup() {
     power_output.setup();//电源控制初始化
     power_output.off();//插电默认关闭电源
     buzz.setup();//蜂鸣器初始化
-    NVSSTORAGE::NVS_read(); // 读取nvs存储
-
 
     /*初始化相关外设*/
 

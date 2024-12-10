@@ -2,18 +2,19 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 功率表相关部分
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-09 17:23:43
+ * @LastEditTime: 2024-12-10 16:34:12
  */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
 #include "INA226.h"
 #include "FixedSizeQueue.hpp"
 #include "static/HXCthread.hpp"
-#include "NVSSTORAGE.hpp"
+#include "HXC_NVS.hpp"
 // 输入电压电流读取相关
 namespace POWERMETER {
+    HXC::NVS_DATA<float> sample_resistance("resistance",2);// NVS数据，采样电阻的值，默认为2mΩ
     constexpr int READ_HZ = 100;                  // 读取电压电流的频率
-    constexpr int data_save_time=10;              // 保存数据的时间 秒
+    constexpr int data_save_time=5;              // 保存数据的时间 秒
     INA226 PowerSensor(0x40);                 // 创建INA226传感器对象
     float voltage = 0;                       // 电压
     float current = 0;                       // 电流
@@ -25,6 +26,7 @@ namespace POWERMETER {
     FixedSizeQueue<float,READ_HZ*data_save_time> voltage_queue;         // 电压队列
     FixedSizeQueue<float,READ_HZ*data_save_time> current_queue;         // 电流队列
     FixedSizeQueue<float,READ_HZ*data_save_time> power_queue;         // 功率队列
+
     // 初始化
     void setup(){
         Wire.setPins(5, 4);                   // 设置I2C引脚
@@ -47,7 +49,7 @@ namespace POWERMETER {
             int16_t data = *(int16_t*)&row_data;
             data = data > 0 ? data : -data;
 
-            current = double(data) *NVSSTORAGE::sample_resistance* 5e-4;     // 转换电流数据
+            current = double(data) *sample_resistance* 5e-4;     // 转换电流数据
             // 更新最大电压和最大电流
             if (voltage > MAX_VOLTAGE) MAX_VOLTAGE = voltage;
             if (current > MAX_CURRENT) MAX_CURRENT = current;

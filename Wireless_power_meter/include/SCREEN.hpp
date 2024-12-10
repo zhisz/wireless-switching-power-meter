@@ -12,7 +12,7 @@
 #include <list> 
 
 
-#include "static/NVSSTORAGE.hpp"
+#include "static/HXC_NVS.hpp"
 #include "static/POWERMETER.hpp"
 #include "static/powerctrl.hpp"
 #include "WIRELESSCTRL.hpp"
@@ -402,8 +402,9 @@ namespace SCREEN {
         clk.print(macStr);
         clk.setCursor(10, 70);
         
-        using NVSSTORAGE::pair_mac;
-        if(pair_mac[0]==0xFF&&pair_mac[1]==0xFF&&pair_mac[2]==0xFF&&pair_mac[3]==0xFF&&pair_mac[4]==0xFF&&pair_mac[5]==0xFF){
+        MAC_t MAC=WIRELESSCTRL::pair_mac.read();
+
+        if(MAC==broadcastMacAddress){
             clk.setTextColor(TFT_RED);
             clk.print("broadcast mode");
         }else{
@@ -412,7 +413,7 @@ namespace SCREEN {
         }
         clk.setCursor(10, 95);
         
-        sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", pair_mac[0], pair_mac[1], pair_mac[2], pair_mac[3], pair_mac[4], pair_mac[5]);
+        sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", MAC[0], MAC[1], MAC[2],MAC[3], MAC[4], MAC[5]);
         clk.print(macStr);
 
         clk.setTextColor(TFT_WHITE);

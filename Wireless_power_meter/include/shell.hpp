@@ -2,13 +2,14 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-09 17:36:58
+ * @LastEditTime: 2024-12-10 16:27:18
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
 #include "static/SimpleSerialShell.hpp"
 #include "static/HXCthread.hpp"
-#include "static/NVSSTORAGE.hpp"
+#include "static/HXC_NVS.hpp"
+#include "static/POWERMETER.hpp"
 namespace SHELL{
 
 
@@ -36,13 +37,13 @@ namespace SHELL{
                 shell.println(F("参数错误"));
                 return -1;
             }
-            NVSSTORAGE::sample_resistance=res;
-            NVSSTORAGE::NVS_save();
+            //赋值
+            POWERMETER::sample_resistance=res;
             return 0;
         });
 
         // esp_now_secret_key 修改esp_now密钥
-        shell.addCommand(F("esp_now_secret_key 设置esp_now密钥"),[](int argc, char** argv){
+        shell.addCommand(F("set_esp_now_secret_key 设置esp_now密钥"),[](int argc, char** argv){
             if(argc!=2){
                 shell.println(F("参数错误"));
                 return -1;
@@ -55,15 +56,16 @@ namespace SHELL{
             }
             shell.println("修改成功");
             shell.printf("新密钥:0x%X",key);
-            NVSSTORAGE::esp_now_secret_key=key;
-            NVSSTORAGE::NVS_save();
+            WIRELESSCTRL::esp_now_secret_key=key;
+            change_secret_key(WIRELESSCTRL::esp_now_secret_key);
             return 0;
         });
 
         // get_esp_now_secret_key 获取esp_now密钥 
         shell.addCommand(F("get_esp_now_secret_key 获取esp_now密钥"),[](int argc, char** argv){
             shell.print("当前密钥:  ");
-            shell.printf("0x%X\n",NVSSTORAGE::esp_now_secret_key);
+            uint16_t key=WIRELESSCTRL::esp_now_secret_key.read();
+            shell.printf("0x%X\n",key);
             return 0;
         });
 

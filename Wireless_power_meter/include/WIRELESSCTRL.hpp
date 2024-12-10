@@ -10,19 +10,24 @@
 #include <Arduino.h>
 #include "static/POWERMETER.hpp"
 #include "static/powerctrl.hpp"
-#include "static/NVSSTORAGE.hpp"
+#include "static/HXC_NVS.hpp"
 #include "static/ESPNOW.hpp"
 extern POWERCTRL_t power_output;
 uint8_t self_Macaddress[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 自己的mac地址,初始化为广播地址
 // 远程控制相关
 namespace WIRELESSCTRL {
-    
+    //NVS数据，用于存储配对的mac地址
+    HXC::NVS_DATA<MAC_t> pair_mac("pair_mac",MAC_t(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF));
+
+    //NVS数据，用于esp_now数据包密钥
+    HXC::NVS_DATA <uint16_t> esp_now_secret_key("secret_key",DEFAULT_SECRET_KEY);
+
     void pair_func(HXC_ESPNOW_data_pakage receive_data){
-        
-        NVSSTORAGE::pair_mac=receive_data.data;
-        NVSSTORAGE::NVS_save();
-        memcpy(peerInfo.peer_addr, NVSSTORAGE::pair_mac, 6);
-        esp_now_add_peer(&peerInfo);
+        // 储存在nvs中
+        pair_mac=receive_data.data;
+        // 添加配对mac
+        add_esp_now_peer_mac(pair_mac);
+        // 发送自己的mac
         esp_now_send_package("pair",self_Macaddress,6,broadcastMacAddress);
     }
 
@@ -88,7 +93,7 @@ namespace WIRELESSCTRL {
     // 获取电源输出状态
     void send_power_state(HXC_ESPNOW_data_pakage receive_data) {
         bool state=power_output.getstate();
-        esp_now_send_package("Power_state",(uint8_t*)(&state),1,NVSSTORAGE::pair_mac);
+        esp_now_send_package("Power_state",(uint8_t*)(&state),1,pair_mac);
     }
 
     // 发送数据结构体
@@ -114,7 +119,7 @@ namespace WIRELESSCTRL {
             };
             uint8_t send_power_data_package_array[sizeof(Power_data)];
             memcpy(send_power_data_package_array, &send_power_data_package, sizeof(Power_data));
-            esp_now_send_package("Power_data",send_power_data_package_array,sizeof(Power_data),NVSSTORAGE::pair_mac);
+            esp_now_send_package("Power_data",send_power_data_package_array,sizeof(Power_data),pair_mac);
             delay(1000/send_data_frc);
         }
     }
@@ -145,13 +150,15 @@ namespace WIRELESSCTRL {
             };
             uint8_t send_power_data_package_array[sizeof(Power_data)];
             memcpy(send_power_data_package_array,&send_power_data_package,sizeof(Power_data));
-            esp_now_send_package("Power_data",send_power_data_package_array,sizeof(Power_data),NVSSTORAGE::pair_mac);
+            esp_now_send_package("Power_data",send_power_data_package_array,sizeof(Power_data),pair_mac);
         }
     }
     // 无线控制初始化
     void wireless_ctrl_setup() {
+        // 从NVS获取保存的esp_now密钥
+        change_secret_key(esp_now_secret_key);
         WiFi.macAddress(self_Macaddress);// 获取自己的mac
-        esp_now_setup(NVSSTORAGE::pair_mac);// ESP-NOW初始化
+        esp_now_setup(pair_mac);// ESP-NOW初始化
         // 注册回调函数
         add_esp_now_callback("Heartbeatpackage",Heartbeat_func);
         add_esp_now_callback("pair",pair_func);
