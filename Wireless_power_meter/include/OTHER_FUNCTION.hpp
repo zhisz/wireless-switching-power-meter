@@ -8,22 +8,29 @@
 #ifndef OTHER_FUNCTION_HPP
 #define OTHER_FUNCTION_HPP
 #include <Arduino.h>
+#include "static/HXC_NVS.hpp"
 #include "static/POWERMETER.hpp"
 #include "static/powerctrl.hpp"
+#include "static/TemperatureSensor.hpp"// 温度传感器
+
 extern POWERCTRL_t power_output;
 namespace OTHER_FUNCTION{
     /*#############串口打印######################*/
     // 串口打印数据
     TaskHandle_t serial_print_handle = nullptr;
     void serial_print_data_task(void* pvParameters) {
-        while (true)
-        {
-        Serial.print("V&A:");// 输出电压:%f
-        Serial.print(POWERMETER::voltage);
-        Serial.print(",");
-        // 输出电流:%f
-        Serial.println(POWERMETER::current);
-        delay(10);
+        while (true){
+            Serial.print("V&A&W:");// 串口打印数据
+            // 输出电压:%f
+            Serial.print(POWERMETER::voltage);
+            Serial.print(",");
+            // 输出电流:%f
+            Serial.print(POWERMETER::current);
+            Serial.print(",");
+            // 输出功率:%f
+            Serial.println(POWERMETER::voltage*POWERMETER::current);
+            
+            delay(1000/POWERMETER::READ_HZ);
         }
     }
     // 串口打印数据控制
@@ -40,15 +47,19 @@ namespace OTHER_FUNCTION{
     /*#############串口打印######################*/
 
     /*#############电流保护######################*/
-    float current_protect_value = 30;// 电流保护值,A
+    HXC::NVS_DATA<bool> default_current_protect_state("current_p_sta",false);// 默认电流保护状态
+
+    HXC::NVS_DATA<float> current_protect_value("current_value",40);// 电流保护值,A
     TaskHandle_t current_protect_handle = nullptr;
     void current_protect_task(void* pvParameters) {
         while (true)
-        {
+        {   
             if(POWERMETER::current>current_protect_value){
                 power_output.off();
+                buzz.buzz(0.5);
+                delay(5000);
             }
-            delay(10);
+            delay(2);
         }
     }
     // 开关电流保护
@@ -66,12 +77,15 @@ namespace OTHER_FUNCTION{
 
 
     /*#############低电压保护######################*/
-    float voltage_protect_value = 12;// 电压保护值,V
+    HXC::NVS_DATA<bool> default_low_voltage_protect_state("voltage_p_sta",false);// 默认电流保护状态
+    HXC::NVS_DATA<float> low_voltage_protect_value("low_voltage_value",12);// 电压保护值,V
     TaskHandle_t voltage_protect_task_handle= nullptr;
     void voltage_protect_task(void* p){
         while (true){
-            if(POWERMETER::voltage_queue.get_average()<voltage_protect_value){//这里求平均防止突然的大负载压降关断
+            if(POWERMETER::voltage_queue.get_average()<low_voltage_protect_value){//这里求平均防止突然的大负载压降关断
                 power_output.off();
+                buzz.buzz(0.5);
+                delay(5000);
             }
             delay(10);
         }
@@ -82,12 +96,39 @@ namespace OTHER_FUNCTION{
             xTaskCreate(voltage_protect_task, "voltage_protect", 2048, NULL, 5, &voltage_protect_task_handle);
         }else{
             if(voltage_protect_task!=nullptr){
-                vTaskDelete(voltage_protect_task);
+                vTaskDelete(voltage_protect_task_handle);
                 voltage_protect_task_handle = nullptr;
             }
         }
     }
     /*#############低电压保护######################*/
     
+    
+    /*#############高温保护######################*/
+    extern TemperatureSensor_t Temperature_sensor;       // 温度传感器
+    HXC::NVS_DATA<bool> default_high_temperature_protect_state("temp_p_sta",false);// 默认电流保护状态
+    HXC::NVS_DATA<float> high_temperature_protect_value("temp_protect_value",80);// 温度保护值,℃
+    TaskHandle_t temperature_protect_task_handle= nullptr;
+    void temperature_protect_task(void* p){
+        while (true){
+            if(Temperature_sensor.getTemperature()>high_temperature_protect_value){
+                power_output.off();
+                buzz.buzz(0.5);
+                delay(5000);
+            }
+            delay(10);
+        }
+    }
+    // 开关高温保护
+    void temperature_protect_ctrl(bool state) {
+        if (state&&temperature_protect_task_handle==nullptr) {
+            xTaskCreate(temperature_protect_task, "temperature_protect", 2048, NULL, 5, &temperature_protect_task_handle);
+        }else{
+            if(temperature_protect_task_handle!=nullptr){
+                vTaskDelete(temperature_protect_task_handle);
+                temperature_protect_task_handle = nullptr;
+            }
+        }
+    }
 }
 #endif

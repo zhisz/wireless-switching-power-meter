@@ -27,26 +27,19 @@ extern POWERCTRL_t power_output;
 
 // 格式化浮点数为固定长度的字符串
 void sprintf_float(double value, char* buffer, int len) {
-    int max = pow(10, len) - 1;               // 最大值，根据长度决定
+    // 计算最大值，根据长度决定
+    int max = pow(10, len) - 1;
+    // 如果值大于最大值，则将其设置为最大值
     if (value > max) value = max;
+    // 如果值小于0，则将其设置为0
     if (value < 0) value = 0;
-    
-    int count = 0;
-    int temp = value;                            // 记录小数点前的位数
-    while (temp > 10) {
-        temp /= 10;
-        count++;
-    }
-    
-    // 构建格式化字符串
-    String format = "%";
-    if (count == len) {
-        format += "d";
-    } else {
-        format += "." + String(len - count) + "f";
-    }
-    
-    sprintf(buffer, format.c_str(), value);   // 格式化浮点数
+
+    // 将浮点数转换为字符串
+    String format=String(value,6);
+    // 截取字符串的前len+1个字符
+    format=format.substring(0,len+1);
+    // 将字符串复制到字符数组中
+    strcpy(buffer,format.c_str());
 }
 
 // 屏幕显示相关
@@ -81,7 +74,7 @@ namespace SCREEN {
             clk.setTextColor(voltage_color);  
             clk.setCursor(10, 10);
             char buffer[4];
-            sprintf_float(POWERMETER::voltage, buffer, 3); // 格式化电压数据
+            sprintf_float(POWERMETER::voltage, buffer, 4); // 格式化电压数据
             clk.setTextFont(6);
             clk.setTextSize(1);
             clk.print(buffer);
@@ -94,7 +87,7 @@ namespace SCREEN {
         auto draw_current = []() {
             clk.setTextColor(current_color);  
             char buffer[4];
-            sprintf_float(POWERMETER::current, buffer, 3); // 格式化电流数据
+            sprintf_float(POWERMETER::current, buffer, 4); // 格式化电流数据
             clk.setCursor(10, 60);
             clk.setTextFont(6);
             clk.setTextSize(1);
@@ -108,7 +101,7 @@ namespace SCREEN {
         auto draw_power = []() {
             clk.setTextColor(power_color); 
             char buffer[4];
-            sprintf_float(POWERMETER::voltage * POWERMETER::current, buffer, 3); // 格式化功率数据
+            sprintf_float(POWERMETER::voltage_queue.get_average() * POWERMETER::current_queue.get_average(), buffer, 4); // 格式化功率数据
             clk.setCursor(10, 110);
             clk.setTextFont(4);
             clk.setTextSize(1);
@@ -155,14 +148,14 @@ namespace SCREEN {
             
             clk.setCursor(170, 50);
             clk.setTextColor(TFT_RED);
-            sprintf_float(POWERMETER::MAX_VOLTAGE, buffer, 2);
+            sprintf_float(POWERMETER::MAX_VOLTAGE, buffer, 3);
             clk.print(buffer);
             clk.setTextColor(default_color);
             clk.print("V");
 
             clk.setCursor(170, 70);
             clk.setTextColor(TFT_GREEN);
-            sprintf_float(POWERMETER::MAX_CURRENT, buffer, 2);
+            sprintf_float(POWERMETER::MAX_CURRENT, buffer, 3);
             clk.print(buffer);
             clk.setTextColor(default_color);
             clk.print("A");
@@ -196,7 +189,7 @@ namespace SCREEN {
         // 显示累计毫安时
         auto draw_output_mah = []() {
             char buffer[4];
-            sprintf_float(POWERMETER::output_mah, buffer, 4); // 显示累计毫安时
+            sprintf_float(POWERMETER::output_mah, buffer, 5); // 显示累计毫安时
             clk.setCursor(0, 15);
             clk.setTextFont(6);
             clk.setTextSize(1);
@@ -210,7 +203,7 @@ namespace SCREEN {
         // 显示累计毫瓦时
         auto draw_output_mwh = []() {
             char buffer[4];
-            sprintf_float(POWERMETER::output_mwh, buffer, 4); // 显示累计毫瓦时
+            sprintf_float(POWERMETER::output_mwh, buffer, 5); // 显示累计毫瓦时
             clk.setCursor(0, 60);
             clk.setTextFont(6);
             clk.setTextSize(1);
@@ -224,6 +217,7 @@ namespace SCREEN {
         // 显示累计时间
         auto draw_runtime = []() {
             char buffer[4];
+            int time_h = POWERMETER::last_time / 3600000;
             int time_m = POWERMETER::last_time / 60000;
             int time_s = (POWERMETER::last_time % 60000) / 1000;
             int time_ms = POWERMETER::last_time%100;
@@ -231,14 +225,14 @@ namespace SCREEN {
             clk.setTextFont(4);
             clk.setTextSize(1);
             clk.setTextColor(time_color); // 设置颜色
-            clk.print("Runtime:  ");
-            sprintf(buffer, "%4d", time_m);
+            clk.print("Runtime=");
+            sprintf(buffer, "%4d", time_h);
             clk.print(time_m);
             clk.print(":");
-            sprintf(buffer, "%2d", time_s);
+            sprintf(buffer, "%2d", time_m);
             clk.print(buffer);
             clk.print(":");
-            sprintf(buffer, "%2d", time_ms);
+            sprintf(buffer, "%2d", time_s);
             buffer[2] = '\0';
             clk.print(buffer);
         };draw_runtime(); // 调用运行时间绘制函数
@@ -248,9 +242,9 @@ namespace SCREEN {
     // 曲线页面
     void curve_page() {
         // 曲线低点和高点高度
-        constexpr float curve_maxi_height = 0.8;  // 0-1
-        constexpr float curve_mini_height = 0.1; // 0-1
-        constexpr int smooth_curve_level = 1;    // 平滑曲线的等级
+        constexpr float curve_maxi_height = 0.8;  // 0~1
+        constexpr float curve_mini_height = 0.1; // 0~1
+        constexpr int smooth_curve_level = 0;    // 平滑曲线的等级
 
         // 曲线点缓存
         static uint8_t power_curve_point[190];
@@ -328,20 +322,23 @@ namespace SCREEN {
         auto process_curve_points = [&]() {
             for (int i = 0; i < 190; i++) {
                 if (POWERMETER::power_queue.get_max() - POWERMETER::power_queue.get_min() != 0) {
+                    float max_var = POWERMETER::power_queue.get_max();
                     float mini_var = POWERMETER::power_queue.get_min();
-                    float data_range = POWERMETER::MAX_CURRENT * POWERMETER::MAX_VOLTAGE - mini_var;
+                    float data_range = max_var - mini_var;
                     power_curve_point[i] = 135 * (POWERMETER::power_queue.toArray()[int(i * step)] - mini_var) / (curve_scale * data_range);
                 }
 
                 if (POWERMETER::voltage_queue.get_max() - POWERMETER::voltage_queue.get_min() != 0) {
+                    float max_var = POWERMETER::voltage_queue.get_max();
                     float mini_var = POWERMETER::voltage_queue.get_min();
-                    float data_range = POWERMETER::MAX_VOLTAGE - mini_var;
+                    float data_range = max_var - mini_var;
                     voltage_curve_point[i] = 135 * (POWERMETER::voltage_queue.toArray()[int(i * step)] - mini_var) / (curve_scale * data_range);
                 }
 
                 if (POWERMETER::current_queue.get_max() - POWERMETER::current_queue.get_min() != 0) {
+                    float max_var = POWERMETER::current_queue.get_max();
                     float mini_var = POWERMETER::current_queue.get_min();
-                    float data_range = POWERMETER::MAX_CURRENT - mini_var;
+                    float data_range = max_var - mini_var;
                     current_curve_point[i] = 135 * (POWERMETER::current_queue.toArray()[int(i * step)] - mini_var) / (curve_scale * data_range);
                 }
             }

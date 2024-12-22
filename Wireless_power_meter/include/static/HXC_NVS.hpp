@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXC战队nvs储存系统二次封装库，用于储存变量到NVS
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-10 16:32:06
+ * @LastEditTime: 2024-12-22 22:33:03
  */
 #ifndef HXC_NVS_HPP
 #define HXC_NVS_HPP
@@ -58,13 +58,13 @@ public:
         size_t datalen = 0;
         esp_err_t err = nvs_get_blob(_handle, key.c_str(), NULL, &datalen); // 获取数据长度
         if(err!=ESP_OK || datalen!=sizeof(Value_type)){
-            log_e("nvs_get_blob len fail: %s %s", key, nvs_error(err)); // 如果获取长度失败，记录错误信息
+            log_e("KEY=%s NVS无数据,使用默认值", key.c_str()); // 如果获取长度失败，记录错误信息
             is_read=true;
             return value; // 返回默认值
         }
         err = nvs_get_blob(_handle, key.c_str(), (void*)&value, &datalen); // 读取数据
         if(err){
-            log_e("nvs_get_blob fail: %s %s", key.c_str(), nvs_error(err)); // 如果读取失败，记录错误信息
+            log_e("KEY=%s NVS读取失败,使用默认值", key.c_str()); // 如果读取失败，记录错误信息
             return value; // 返回默认值
         }
         is_read=true; // 标记为已读取
