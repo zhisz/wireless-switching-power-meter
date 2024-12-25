@@ -101,7 +101,7 @@ namespace SCREEN {
         auto draw_power = []() {
             clk.setTextColor(power_color); 
             char buffer[4];
-            sprintf_float(POWERMETER::voltage_queue.get_average() * POWERMETER::current_queue.get_average(), buffer, 4); // 格式化功率数据
+            sprintf_float(POWERMETER::voltage * POWERMETER::current, buffer, 4); // 格式化功率数据
             clk.setCursor(10, 110);
             clk.setTextFont(4);
             clk.setTextSize(1);

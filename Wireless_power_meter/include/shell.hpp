@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-22 22:39:56
+ * @LastEditTime: 2024-12-25 21:58:06
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
@@ -122,6 +122,7 @@ namespace SHELL{
             OTHER_FUNCTION::current_protect_ctrl(state);
             return 0;
         });
+
         // set_high_temperature_protect 设置高温保护
         shell.addCommand(F("set_high_temperature_protect 设置高温保护\n  set_high_temperature_protect [默认是否开启] [高温值:℃]"),[](int argc, char** argv){
             if(argc!=3){

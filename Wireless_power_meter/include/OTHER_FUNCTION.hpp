@@ -82,7 +82,7 @@ namespace OTHER_FUNCTION{
     TaskHandle_t voltage_protect_task_handle= nullptr;
     void voltage_protect_task(void* p){
         while (true){
-            if(POWERMETER::voltage_queue.get_average()<low_voltage_protect_value){//这里求平均防止突然的大负载压降关断
+            if(POWERMETER::voltage<low_voltage_protect_value){
                 power_output.off();
                 buzz.buzz(0.5);
                 delay(5000);
@@ -92,10 +92,10 @@ namespace OTHER_FUNCTION{
     }
     // 开关低压保护
     void voltage_protect_ctrl(bool state) {
-        if (state&&voltage_protect_task==nullptr) {
-            xTaskCreate(voltage_protect_task, "voltage_protect", 2048, NULL, 5, &voltage_protect_task_handle);
+        if (state&&voltage_protect_task_handle==nullptr) {
+            xTaskCreate(voltage_protect_task, "voltage_protect", 8192, NULL, 5, &voltage_protect_task_handle);
         }else{
-            if(voltage_protect_task!=nullptr){
+            if(voltage_protect_task_handle!=nullptr){
                 vTaskDelete(voltage_protect_task_handle);
                 voltage_protect_task_handle = nullptr;
             }
@@ -107,7 +107,7 @@ namespace OTHER_FUNCTION{
     /*#############高温保护######################*/
     extern TemperatureSensor_t Temperature_sensor;       // 温度传感器
     HXC::NVS_DATA<bool> default_high_temperature_protect_state("temp_p_sta",false);// 默认电流保护状态
-    HXC::NVS_DATA<float> high_temperature_protect_value("temp_protect_value",80);// 温度保护值,℃
+    HXC::NVS_DATA<float> high_temperature_protect_value("temp_protect_value",60);// 温度保护值,℃
     TaskHandle_t temperature_protect_task_handle= nullptr;
     void temperature_protect_task(void* p){
         while (true){
@@ -129,6 +129,13 @@ namespace OTHER_FUNCTION{
                 temperature_protect_task_handle = nullptr;
             }
         }
+    }
+
+    // 保护初始化
+    void protect_init(){
+        current_protect_ctrl(default_current_protect_state.read());// 电流保护初始化
+        voltage_protect_ctrl(default_low_voltage_protect_state.read());// 电压保护初始化
+        temperature_protect_ctrl(default_high_temperature_protect_state.read());// 温度保护初始化
     }
 }
 #endif
