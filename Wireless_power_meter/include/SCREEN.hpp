@@ -221,20 +221,19 @@ namespace SCREEN {
             int time_m = POWERMETER::last_time / 60000;
             int time_s = (POWERMETER::last_time % 60000) / 1000;
             int time_ms = POWERMETER::last_time%100;
-            clk.setCursor(20, 110);
+            clk.setCursor(80, 110);
             clk.setTextFont(4);
             clk.setTextSize(1);
             clk.setTextColor(time_color); // 设置颜色
-            clk.print("Runtime=");
-            sprintf(buffer, "%4d", time_h);
+            clk.print(time_h);
+            clk.print(":");
+            if(time_m < 10)
+                clk.print("0");
             clk.print(time_m);
             clk.print(":");
-            sprintf(buffer, "%2d", time_m);
-            clk.print(buffer);
-            clk.print(":");
-            sprintf(buffer, "%2d", time_s);
-            buffer[2] = '\0';
-            clk.print(buffer);
+            if(time_s < 10)
+                clk.print("0");
+            clk.print(time_s);
         };draw_runtime(); // 调用运行时间绘制函数
     }
 
