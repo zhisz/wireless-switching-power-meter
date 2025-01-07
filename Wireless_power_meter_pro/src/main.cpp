@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-01-06 21:30:35
+ * @LastEditTime: 2025-01-07 13:27:59
  */
 /*
                                               .=%@#=.
@@ -91,7 +91,7 @@ BUZZ_t buzz(BUZZER_PIN);                      // 蜂鸣器
 void setup() {
     Serial.begin(115200); // 初始化串口
 
-    /*↓↓↓↓↓↓↓初始化相关外设↓↓↓↓↓↓↓*/
+    // /*↓↓↓↓↓↓↓初始化相关外设↓↓↓↓↓↓↓*/
     Temperature_sensor.setup();//温度传感器初始化
     power_output.setup();//电源控制初始化
     power_output.off();//插电默认关闭电源
