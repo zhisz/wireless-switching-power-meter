@@ -10,6 +10,7 @@ https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 注意不可直接打开根目录，只能打开项目文件夹否则PlatformIO无法识别
 
 # 文件介绍
+- Wireless_power_meter_pro ：pro版本功率计本体代码
 - Wireless_power_meter ：功率计本体代码
 - goodsbutton ：mini开关代码
 - stopbutton ：急停开关代码
