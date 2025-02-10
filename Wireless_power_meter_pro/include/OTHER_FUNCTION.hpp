@@ -12,13 +12,14 @@
 #include "static/POWERMETER.hpp"
 #include "static/powerctrl.hpp"
 #include "static/TemperatureSensor.hpp"// 温度传感器
+#include "static/HXCthread.hpp"
 
 extern POWERCTRL_t power_output;
 namespace OTHER_FUNCTION{
     /*#############串口打印######################*/
     // 串口打印数据
     TaskHandle_t serial_print_handle = nullptr;
-    void serial_print_data_task(void* pvParameters) {
+    HXC::thread<void> serial_print_thread([](){
         while (true){
             Serial.print("V&A&W:");// 串口打印数据
             // 输出电压:%f
@@ -32,28 +33,25 @@ namespace OTHER_FUNCTION{
             
             delay(1000/POWERMETER::READ_HZ);
         }
-    }
+    });
     // 串口打印数据控制
     void serial_print_ctrl(bool state) {
-        if (state&&serial_print_handle==nullptr) {
-            xTaskCreate(serial_print_data_task, "serial_print_data", 2048, NULL, 5, &serial_print_handle);
+        if(state){
+            serial_print_thread.start(/*taskname=*/"serial_print",/*stacksize=*/2048);// 串口打印数据任务启动
         }else{
-            if(serial_print_handle!=nullptr){
-                vTaskDelete(serial_print_handle);
-                serial_print_handle = nullptr;
-            }
+            serial_print_thread.stop();
         }
     }
     /*#############串口打印######################*/
 
     /*#############电流保护######################*/
-    HXC::NVS_DATA<bool> default_current_protect_state("current_p_sta",false);// 默认电流保护状态
+    HXC::NVS_DATA<bool> default_current_protect_state(/*NVS key=*/"current_p_sta",/*default value=*/false);// 默认电流保护状态
 
     HXC::NVS_DATA<float> current_protect_value("current_value",40);// 电流保护值,A
-    TaskHandle_t current_protect_handle = nullptr;
-    void current_protect_task(void* pvParameters) {
-        while (true)
-        {   
+
+    // 电流保护任务
+    HXC::thread<void> current_protect_thread([](){
+        while (true){   
             if(POWERMETER::current>current_protect_value){
                 power_output.off();
                 buzz.buzz(0.5);
@@ -61,16 +59,14 @@ namespace OTHER_FUNCTION{
             }
             delay(2);
         }
-    }
+    });
+
     // 开关电流保护
     void current_protect_ctrl(bool state) {
-        if (state&&current_protect_handle==nullptr) {
-            xTaskCreate(current_protect_task, "current_protect", 2048, NULL, 5, &current_protect_handle);
-        }else{
-            if(current_protect_handle!=nullptr){
-                vTaskDelete(current_protect_handle);
-                current_protect_handle = nullptr;
-            }
+        if(state){
+            current_protect_thread.start(/*taskname=*/"current_protect",/*stacksize=*/2048);// 电流保护任务启动
+        } else {
+            current_protect_thread.stop();
         }
     }
     /*#############电流保护######################*/
@@ -78,9 +74,9 @@ namespace OTHER_FUNCTION{
 
     /*#############低电压保护######################*/
     HXC::NVS_DATA<bool> default_low_voltage_protect_state("voltage_p_sta",false);// 默认电流保护状态
-    HXC::NVS_DATA<float> low_voltage_protect_value("low_voltage_value",12);// 电压保护值,V
-    TaskHandle_t voltage_protect_task_handle= nullptr;
-    void voltage_protect_task(void* p){
+    HXC::NVS_DATA<float> low_voltage_protect_value("low_voltage_value",12);// 电压保护值,单位V
+    // 低电压保护任务
+    HXC::thread<void> voltage_protect_thread([](){
         while (true){
             if(POWERMETER::voltage<low_voltage_protect_value){
                 power_output.off();
@@ -89,16 +85,14 @@ namespace OTHER_FUNCTION{
             }
             delay(10);
         }
-    }
+    });
+    
     // 开关低压保护
     void voltage_protect_ctrl(bool state) {
-        if (state&&voltage_protect_task_handle==nullptr) {
-            xTaskCreate(voltage_protect_task, "voltage_protect", 8192, NULL, 5, &voltage_protect_task_handle);
-        }else{
-            if(voltage_protect_task_handle!=nullptr){
-                vTaskDelete(voltage_protect_task_handle);
-                voltage_protect_task_handle = nullptr;
-            }
+        if(state){
+            voltage_protect_thread.start(/*taskname=*/"voltage_protect",/*stacksize=*/2048);// 低电压保护任务启动
+        } else {
+            voltage_protect_thread.stop();
         }
     }
     /*#############低电压保护######################*/
@@ -108,8 +102,8 @@ namespace OTHER_FUNCTION{
     extern TemperatureSensor_t Temperature_sensor;       // 温度传感器
     HXC::NVS_DATA<bool> default_high_temperature_protect_state("temp_p_sta",false);// 默认电流保护状态
     HXC::NVS_DATA<float> high_temperature_protect_value("temp_protect_value",60);// 温度保护值,℃
-    TaskHandle_t temperature_protect_task_handle= nullptr;
-    void temperature_protect_task(void* p){
+    // 高温保护任务
+    HXC::thread<void> temperature_protect_thread([](){
         while (true){
             if(Temperature_sensor.getTemperature()>high_temperature_protect_value){
                 power_output.off();
@@ -118,16 +112,14 @@ namespace OTHER_FUNCTION{
             }
             delay(10);
         }
-    }
+    });
+
     // 开关高温保护
     void temperature_protect_ctrl(bool state) {
-        if (state&&temperature_protect_task_handle==nullptr) {
-            xTaskCreate(temperature_protect_task, "temperature_protect", 2048, NULL, 5, &temperature_protect_task_handle);
-        }else{
-            if(temperature_protect_task_handle!=nullptr){
-                vTaskDelete(temperature_protect_task_handle);
-                temperature_protect_task_handle = nullptr;
-            }
+        if(state){
+            temperature_protect_thread.start(/*taskname=*/"temperature_protect",/*stacksize=*/2048);// 高温保护任务启动
+        } else {
+            temperature_protect_thread.stop();
         }
     }
 
