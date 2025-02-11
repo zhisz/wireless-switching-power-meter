@@ -476,6 +476,7 @@ namespace SCREEN {
     // 屏幕更新任务
     HXC::thread<void> updatescreen_thread([]() {
         SCREEN::setup();
+        auto xLastWakeTime = xTaskGetTickCount();// 获取当前时间，用于控制屏幕刷新率
         while (true) {
             tft.startWrite();
             clk.fillSprite(TFT_BLACK);                             // 清空缓冲区
@@ -485,7 +486,7 @@ namespace SCREEN {
             clk.drawRoundRect(0, 0, 240, 135, 0, border_color);      // 绘制矩形边框
             clk.pushSprite(0, 0);                                  // 将缓冲区内容推送到屏幕
             tft.endWrite();                                        // 结束写入
-            delay(1000 / SCREEN_HZ);                               // 控制刷新率
+            xTaskDelayUntil(&xLastWakeTime, configTICK_RATE_HZ / SCREEN_HZ);// 等待下一帧
         }
     });
 }
