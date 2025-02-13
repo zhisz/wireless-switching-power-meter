@@ -10,7 +10,6 @@ const char index_html[] PROGMEM = R"=====(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>实时电压电流监测</title>
   <script src="/jquery-3.7.1.min.js"></script>
-  <!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
   <script src="/highcharts.js"></script>
   <style>
     /* 简单样式，适配手机端 */
@@ -21,6 +20,10 @@ const char index_html[] PROGMEM = R"=====(
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      /* 垂直居中 */
+      height: 100vh;
+      /* 页面高度 */
       background-color: #f4f4f4;
     }
 
@@ -32,35 +35,88 @@ const char index_html[] PROGMEM = R"=====(
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .real-time-data {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      /* 每个数据为一行 */
       margin-bottom: 20px;
+      width: 100%;
     }
 
     .real-time-data div {
-      font-size: 18px;
+      font-size: 24px;
+      /* 增大字体大小 */
       font-weight: bold;
+      margin-bottom: 10px;
+      /* 每行之间的间距 */
     }
 
     .chart-container {
       height: 400px;
       margin-bottom: 20px;
+      width: 100%;
     }
 
-    .switch-button {
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
+    /* 圆形开关样式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 20vh;
+      height: 20vh;
+      /* 高度为页面高度的20% */
+      max-height: 100px;
+      /* 最大高度限制 */
+      margin: 20px 0;
+      /* 上下留出间距 */
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
       cursor: pointer;
-      font-size: 16px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.2s;
+      border-radius: 50vh;
     }
 
-    .switch-button.off {
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: calc(100% - 8px);
+      /* 滑块高度 */
+      width: calc(50% - 4px);
+      /* 滑块宽度 */
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.2s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: #4CAF50;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(calc(100% - 8px));
+      /* 滑块滑动距离 */
+    }
+
+    .slider.off {
       background-color: #f44336;
     }
   </style>
@@ -79,8 +135,11 @@ const char index_html[] PROGMEM = R"=====(
     <!-- 实时曲线展示 -->
     <div class="chart-container" id="chart-container"></div>
 
-    <!-- 按钮切换 -->
-    <button class="switch-button" id="switchButton" onclick="toggleState()">点击开启</button>
+    <!-- 圆形开关按钮 -->
+    <label class="switch">
+      <input type="checkbox" id="switchButton" onclick="toggleState()">
+      <span class="slider"></span>
+    </label>
   </div>
 
   <script>
@@ -176,13 +235,12 @@ const char index_html[] PROGMEM = R"=====(
 
     function toggleState() {
       isOn = !isOn;
+      const slider = document.querySelector('.slider');
       const button = document.getElementById('switchButton');
       if (isOn) {
-        button.innerText = '点击关闭';
-        button.classList.remove('off');
+        slider.classList.remove('off');
       } else {
-        button.innerText = '点击开启';
-        button.classList.add('off');
+        slider.classList.add('off');
       }
 
       // 发送开关状态到后端
