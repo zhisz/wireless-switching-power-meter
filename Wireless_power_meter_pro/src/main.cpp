@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-01-07 13:27:59
+ * @LastEditTime: 2025-02-13 15:45:12
  */
 /*
                                               .=%@#=.
@@ -82,6 +82,7 @@
 #include "BUTTONS.hpp"// 按键
 #include "SCREEN.hpp"// 屏幕
 #include "shell.hpp"// 串口命令行
+#include "web.hpp"// 网页
 // 初始化各种模块
 POWERCTRL_t power_output(PowerPin);           // 电源控制
 TemperatureSensor_t Temperature_sensor;       // 温度传感器
@@ -97,6 +98,7 @@ void setup() {
     power_output.off();//插电默认关闭电源
     buzz.setup();//蜂鸣器初始化
     OTHER_FUNCTION::protect_init();//保护初始化
+    web_setup();//网页初始化
     /*初始化相关外设*/
 
 
@@ -106,10 +108,9 @@ void setup() {
     SCREEN::updatescreen_thread.start("updatescreen",/*stacksize=*/8192);// 屏幕更新任务
     SHELL::shell_thread.start("shell",/*stacksize=*/2048);// 串口命令行任务
     /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/
-
     delay(2000);// 延时防止重启
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
-    shell.execute("hello shell");
+    shell.println("hello shell");
 }
 
 // Arduino主循环,本项目不使用

@@ -5,4 +5,6 @@
 .vscode/ipch
 .pio/libdeps/Wireless_power_meter_pro/Adafruit BusIO
 .pio/libdeps/Wireless_power_meter_pro/Adafruit INA228 Library
+.pio/libdeps/Wireless_power_meter_pro/ArduinoJson
 .pio/libdeps/Wireless_power_meter_pro/OneButton
+web/c_header

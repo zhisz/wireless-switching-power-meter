@@ -3,9 +3,14 @@ Import("env")
 import os
 
 # 定义要嵌入的文件
-files_to_embed = [
-    ("index_html", "include/web/src/index.html"),
-]
+files_to_embed = []
+# 遍历include/web/src
+for root, dirs, files in os.walk("include/web/src"):
+    for file in files:
+        file_path = os.path.join(root, file)
+        #替换空格,-,点为_
+        file_name = file.replace(" ","_").replace(".","_").replace("-","_")
+        files_to_embed.append((file_name, file_path))
 # 将文件转换为 C/C++ 数组
 for var_name, file_path in files_to_embed:
     with open(file_path, "r",encoding="utf-8") as f:
