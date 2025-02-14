@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-13 15:45:12
+ * @LastEditTime: 2025-02-14 11:54:54
  */
 /*
                                               .=%@#=.
@@ -98,7 +98,7 @@ void setup() {
     power_output.off();//插电默认关闭电源
     buzz.setup();//蜂鸣器初始化
     OTHER_FUNCTION::protect_init();//保护初始化
-    web_setup();//网页初始化
+    web_setup("HXC","",WIFI_MODE_AP);//网页初始化
     /*初始化相关外设*/
 
 

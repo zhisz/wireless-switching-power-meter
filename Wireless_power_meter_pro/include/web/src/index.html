@@ -5,57 +5,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>实时电压电流监测</title>
-  <script src="/jquery-3.7.1.min.js"></script>
-  <script src="/highcharts.js"></script>
   <style>
-    /* 简单样式，适配手机端 */
+    /* 全局样式 */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      /* 垂直居中 */
       height: 100vh;
-      /* 页面高度 */
-      background-color: #f4f4f4;
+      background-color: #FFFFFF;
     }
 
     .container {
-      width: 100%;
-      max-width: 800px;
-      margin: 20px;
-      background-color: #fff;
+      width: 90%;
+      max-width: 400px;
+      background-color: #ffecd1;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       align-items: center;
+      box-sizing: border-box;
     }
 
+    /* 实时数据样式 */
     .real-time-data {
-      display: flex;
-      flex-direction: column;
-      /* 每个数据为一行 */
-      margin-bottom: 20px;
       width: 100%;
+      margin-bottom: 20px;
+      text-align: center;
     }
 
     .real-time-data div {
-      font-size: 24px;
-      /* 增大字体大小 */
-      font-weight: bold;
-      margin-bottom: 10px;
-      /* 每行之间的间距 */
+      font-size: 52px;
+      font-weight: 600;
+      color: #001524;
+      margin: 12px 0;
+      padding: 15px;
+      background-color: #b7b7a4;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .chart-container {
-      height: 400px;
-      margin-bottom: 20px;
-      width: 100%;
+    .real-time-data span {
+      /* 等宽字体 */
+      font-family: monospace;
     }
 
     /* 圆形开关样式 */
@@ -104,16 +101,12 @@
     }
 
     input:checked+.slider {
-      background-color: #4CAF50;
+      background-color: #00f5d4;
     }
 
     input:checked+.slider:before {
       transform: translateX(calc(100% - 8px));
       /* 滑块滑动距离 */
-    }
-
-    .slider.off {
-      background-color: #f44336;
     }
   </style>
 </head>
@@ -122,14 +115,11 @@
   <div class="container">
     <!-- 实时数据展示 -->
     <div class="real-time-data">
-      <div>电压: <span id="voltage">0</span> V</div>
-      <div>电流: <span id="current">0</span> A</div>
-      <div>功率: <span id="power">0</span> W</div>
-      <div>耗电量: <span id="mah">0</span> mAH</div>
+      <div><span id="voltage" style="color: #d90429;">0.000</span>V</div>
+      <div><span id="current" style="color: #00f5d4;">0.000</span>A</div>
+      <div><span id="power" style="color: #00bbf9;">0.000</span>W</div>
+      <div><span id="mah" style="color: #9b5de5;">0.000</span>mAH</div>
     </div>
-
-    <!-- 实时曲线展示 -->
-    <div class="chart-container" id="chart-container"></div>
 
     <!-- 圆形开关按钮 -->
     <label class="switch">
@@ -139,101 +129,53 @@
   </div>
 
   <script>
-    // 初始化Highcharts图表
-    let voltageData = [];
-    let currentData = [];
-    let powerData = [];
-    let timeData = [];
-    let chart;
-    function initializeChart() {
-      chart = Highcharts.chart('chart-container', {
-        chart: {
-          type: 'line'
-        },
-        title: {
-          text: '电压、电流、功率实时曲线'
-        },
-        xAxis: {
-          categories: timeData,
-          title: {
-            text: '时间'
-          }
-        },
-        yAxis: [{
-          title: {
-            text: '电压 (V)'
-          },
-          opposite: false
-        }, {
-          title: {
-            text: '电流 (A)'
-          },
-          opposite: true
-        }, {
-          title: {
-            text: '功率 (W)'
-          },
-          opposite: false
-        }],
-        series: [{
-          name: '电压 (V)',
-          data: voltageData,
-          yAxis: 0  // 使用第一个Y轴（电压）
-        }, {
-          name: '电流 (A)',
-          data: currentData,
-          yAxis: 1  // 使用第二个Y轴（电流）
-        }, {
-          name: '功率 (W)',
-          data: powerData,
-          yAxis: 2  // 使用第三个Y轴（功率）
-        }]
-      });
-    }
+    // 格式化浮动数值为固定长度的字符串
+    function sprintfFloat(value, len) {
+      // 计算最大值
+      const max = Math.pow(10, len) - 1;
 
+      // 如果值大于最大值，则将其设置为最大值
+      if (value > max) {
+        value = max;
+      }
+
+      // 如果值小于0，则将其设置为0
+      if (value < 0) {
+        value = 0;
+      }
+
+      // 将浮点数转换为字符串，并保留6位小数
+      let formattedValue = value.toFixed(6);
+
+      // 截取字符串的前len+1个字符（包括小数点）
+      formattedValue = formattedValue.substring(0, len + 1);
+
+      return formattedValue;
+    }
     // 获取后端数据并更新UI
     function fetchData() {
       fetch('/data')
         .then(response => response.json())
         .then(data => {
-          const timestamp = new Date().toLocaleTimeString();
-          // 更新实时数据显示
-          document.getElementById('voltage').innerText = data.voltage;
-          document.getElementById('current').innerText = data.current;
-          document.getElementById('power').innerText = data.power;
-          document.getElementById('mah').innerText = data.mah;
-
-          // 更新曲线数据
-          if (timeData.length >= 10) {
-            timeData.shift();
-            voltageData.shift();
-            currentData.shift();
-            powerData.shift();
-          }
-          timeData.push(timestamp);
-          voltageData.push(data.voltage);
-          currentData.push(data.current);
-          powerData.push(data.power);
-
-          chart.xAxis[0].setCategories(timeData);
-          chart.series[0].setData(voltageData);
-          chart.series[1].setData(currentData);
-          chart.series[2].setData(powerData);
+          document.getElementById('voltage').innerText = sprintfFloat(parseFloat(data.voltage), 4);
+          document.getElementById('current').innerText = sprintfFloat(parseFloat(data.current), 4);
+          document.getElementById('power').innerText = sprintfFloat(parseFloat(data.power), 4);
+          document.getElementById('mah').innerText = sprintfFloat(parseFloat(data.mah), 4);
         })
         .catch(err => console.error('获取数据失败:', err));
     }
 
     // 刷新数据
-    setInterval(fetchData, 300);
+    setInterval(fetchData, 200);
 
     // 按钮开关状态
-    let isOn = true;
+    let isOff = true;
 
     function toggleState() {
-      isOn = !isOn;
+      isOff = !isOff;
       const slider = document.querySelector('.slider');
       const button = document.getElementById('switchButton');
-      if (isOn) {
+      if (isOff) {
         slider.classList.remove('off');
       } else {
         slider.classList.add('off');
@@ -245,14 +187,12 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ state: isOn })
+        body: JSON.stringify({ state: isOff })
       })
         .then(response => response.json())
         .catch(err => console.error('开关状态更新失败:', err));
     }
 
-    // 初始化图表
-    initializeChart();
     fetchData(); // 启动第一次数据加载
   </script>
 </body>
