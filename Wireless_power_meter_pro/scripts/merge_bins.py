@@ -1,3 +1,4 @@
+# 生成可直接烧录的bin固件
 Import('env')
 import os
 OUTPUT_DIR = "$BUILD_DIR{}".format(os.path.sep)

@@ -1,3 +1,4 @@
+# 将include/web/src下的文件转换为C/C++数组,方便编译到flash
 Import("env")
 
 import os

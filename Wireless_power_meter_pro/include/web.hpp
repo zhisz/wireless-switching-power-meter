@@ -3,7 +3,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 网页控制相关代码
  * @author: qingmeijiupiao
- * @LastEditTime: 2025-02-14 11:51:28
+ * @LastEditTime: 2025-02-18 17:48:48
  */
 #ifndef WEB_HPP
 #define WEB_HPP
@@ -11,14 +11,16 @@
 #include <DNSServer.h>
 #include <WebServer.h>
 #include <ArduinoJson.h>
-#include "web/c_header/index_html.h"
+#include "web/c_header/index_html.h"// 前端文件，这个头文件是自动生成的，要修改到include/web/src/
 #include "static/HXCthread.hpp"
 #include "static/POWERMETER.hpp"
+#include "static/HXC_NVS.hpp"
 //创建一个异步Web服务器
 WebServer server(80);  
 
+//后端线程
 HXC::thread<void> web_thread([](){
-    constexpr int web_feedback_hz = 100;
+    constexpr int web_feedback_hz = 100;// web后端轮询频率
     auto xLastWakeTime = xTaskGetTickCount();// 获取当前时间，用于控制刷新率
     while (true){
         server.handleClient(); // 处理web请求
@@ -27,13 +29,13 @@ HXC::thread<void> web_thread([](){
 });
 
 
-//自动弹出界面实现
+//自动弹出界面实现线程
 HXC::thread<void> DNS_thread([](){
     // 定义DNS服务器对象,用于自动弹出网页
     DNSServer dns;
     IPAddress apIP = WiFi.softAPIP();
     dns.start(53, "*", apIP);
-    constexpr int DNS_feedback_hz = 10;
+    constexpr int DNS_feedback_hz = 10;// DNS轮询频率
     auto xLastWakeTime = xTaskGetTickCount();// 获取当前时间，用于控制刷新率
     while (true){
         dns.processNextRequest(); // 处理DNS请求
@@ -42,9 +44,18 @@ HXC::thread<void> DNS_thread([](){
     
 });
 
+//web启动状态
+static bool web_state=false;
+
+bool get_web_state() {  
+    return web_state;
+}
 
 //后端设置
 void server_setup(){
+    if(web_state==true){
+        return;
+    }
     // 根目录请求
     server.on("/", [](){
         // 发送网页内容
@@ -60,31 +71,29 @@ void server_setup(){
     // Apple设备检测请求
     server.on("/hotspot-detect.html", handleDetect);
 
-    //创建/data API 返回功率数据的json文件
+    //创建 /data API 返回功率数据的json文件
     server.on("/data", [](){
-        float voltage = POWERMETER::voltage;
-        float current = POWERMETER::current;
-        float power = voltage * current;
-        float mah = POWERMETER::output_mah;
-        float mwh = POWERMETER::output_mwh;
-    
+        // 创建 JSON 文档
         JsonDocument doc;
-        doc["voltage"] = voltage;
-        doc["current"] = current;
-        doc["power"] = power;
-        doc["mah"] = mah;
-        doc["state"] = power_output.getstate();
+        doc["voltage"] = POWERMETER::voltage;// 电压
+        doc["current"] = POWERMETER::current;// 电流
+        doc["mah"] = POWERMETER::output_mah;// 累计功耗
+        doc["state"] = power_output.getstate();// 输出状态
+        doc["time"] = millis();// 当前时间
+
+        // 将 JSON 文档转换为字符串
         String json;
         serializeJson(doc, json);
-        server.send(200, "application/json", json);
+        server.send(200, "application/json", json);// 发送 JSON 响应
     });
+
     //创建/ctrl API 控制输出
     server.on("/ctrl", [](){
         // 获取 POST 请求体中的数据
         String inputData = server.arg("plain");
         
         // 解析 JSON 数据
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         DeserializationError error = deserializeJson(doc, inputData);
         
         if (error) {
@@ -113,25 +122,51 @@ void server_setup(){
     });
     // 启动服务器
     server.begin();
+    web_state=true;
 };
 
-//网页初始化
+//是否默认启动web
+HXC::NVS_DATA<bool> is_default_start_web("start_web",false);
+
+/**
+ * @brief : 网页初始化,调用该函数后，WIFI和web服务器都会启动
+ * @return  {*}
+ * @Author : qingmeijiupiao
+ * @param {String} ssid :WIFI名称
+ * @param {String} password :WIFI名称 无密码为  ""
+ * @param {wifi_mode_t} mode :WIFI模式  WIFI_STA为连接wifi的模式  WIFI_AP为创建wifi热点的模式
+ */
 void web_setup(String ssid="HXC",String password="",wifi_mode_t mode=WIFI_AP){
     // 创建wifi访问点，设置名称和密码
-    if(mode==WIFI_STA){
+    if(mode==WIFI_STA){ //STA模式
         WiFi.mode(mode);  // 设置为 STA 模式
         WiFi.begin(ssid.c_str(), password.c_str());
-    }else{
+    }else{//AP模式
         WiFi.softAP(ssid.c_str(), password.c_str());
     }
-    //后端设置
+    //后端初始化
     server_setup();
 
     web_thread.start(/*taskname=*/"web",/*stacksize=*/4096);//web线程启动
-    if(WiFi.getMode()!=WIFI_STA){
+    if(WiFi.getMode()!=WIFI_STA){//是AP模式
         DNS_thread.start(/*taskname=*/"DNS",/*stacksize=*/2048);//DNS线程启动
     }
 };
+
+//web停止,断开wifi
+void web_stop(){
+    server.close();
+    web_thread.stop();//web线程停止
+    DNS_thread.stop();//DNS线程停
+    web_state=false;//web状态关闭
+    if(WiFi.getMode()!=WIFI_STA){//是AP模式
+        WiFi.softAPdisconnect();//断开热点
+    }else{
+        WiFi.disconnect();//断开wifi
+    }
+};
+
+
 
 
 #endif
