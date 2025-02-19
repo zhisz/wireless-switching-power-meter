@@ -1,7 +1,7 @@
 # wireless-switching-power-meter
 基于ESP-NOW的无线开关功率计
 
-![mini开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/build_goodsbutton.yml/badge.svg)  ![急停开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/build_stopbutton.yml/badge.svg)  ![功率计代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/build_Wireless_power_meter.yml/badge.svg)
+![mini开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/mini开关代码编译检查.yml/badge.svg)  ![急停开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/急停开关代码编译检查.yml/badge.svg)  ![功率计代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/功率计代码编译检查.yml/badge.svg)
 # 项目介绍
 https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter
 # 开发框架
