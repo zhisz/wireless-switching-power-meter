@@ -1,18 +1,24 @@
-# wireless-switching-power-meter
-基于ESP-NOW的无线开关功率计
+# 无线开关功率计
+## 仓库的README文件主要介绍源代码相关，功能介绍请到嘉立创详情页
 
 ![mini开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/mini开关代码编译检查.yml/badge.svg)  ![急停开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/急停开关代码编译检查.yml/badge.svg)  ![功率计代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/功率计代码编译检查.yml/badge.svg)
-# 项目介绍
+# 项目介绍和功能介绍
 ## [点击打开嘉立创工程链接](https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter)
 
 ## 不想了解代码请跳转[固件烧录](#固件烧录)
-# 开发框架
+# 开发相关
+## 开发框架
 - 本项目采用PlatformIO IDE + Arduino 框架开发
 
 - 使用vscode安装PlatformIO后打开代码文件夹即可编译运行
 
 - 注意不可直接打开根目录，只能打开项目文件夹，否则PlatformIO无法识别
-
+## 使用github生成固件，无需搭建开发环境
+### 1.fork工程
+### 2.github页面编辑 
+按下键盘的```,```按键进入在线编辑
+### 3.提交更改
+![alt text](./.github/image.png)
 # 工程介绍
 ## Wireless_power_meter
 功率计本体代码，pro版本和普通版均为此工程
@@ -147,20 +153,6 @@ void loop(){
     //Serial.println(PowerCtrl::power_data.current);
 }
 ```
-# 功能介绍
-## 功率计本体
-    短按大按钮：关闭
-    长按大按钮：开启
-    侧面按键：翻页
-    长按左边的侧边按键：屏幕翻转180°
-## 急停开关
-
-    拍下大按钮：急停
-    恢复大按钮：恢复
-## mini开关
-    短按：关闭
-    长按2s：开启
-    长按10：发送配对包
 
 # 固件烧录
 如果不想搭建开发环境也可以选择直接烧录固件
