@@ -15,8 +15,12 @@
 - 注意不可直接打开根目录，只能打开项目文件夹，否则PlatformIO无法识别
 ## 使用github生成固件，无需搭建开发环境
 ### 1.fork工程
+![alt text](./.github/image7.png)
 ### 2.github页面编辑 
-按下键盘的```,```按键进入在线编辑
+
+**在自己fork的工程页面下，按下键盘的```,```按键进入在线编辑**
+
+
 ![alt text](./.github/image2.png)
 ### 3.修改代码，提交更改
 此时与用电脑的vscode打开工程文件无区别
@@ -42,6 +46,8 @@
 
 回车后过几分钟固件即可自动上传到release处
 ![alt text](./.github/image6.png)
+![alt text](./.github/image8.png)
+### 5.按照[固件烧录](#固件烧录)处教程烧录固件
 # 工程介绍
 ## Wireless_power_meter
 功率计本体代码，pro版本和普通版均为此工程
