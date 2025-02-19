@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-14 11:54:54
+ * @LastEditTime: 2025-02-19 17:10:33
  */
 /*
                                               .=%@#=.
@@ -98,7 +98,10 @@ void setup() {
     power_output.off();//插电默认关闭电源
     buzz.setup();//蜂鸣器初始化
     OTHER_FUNCTION::protect_init();//保护初始化
-    web_setup("HXC","",WIFI_MODE_AP);//网页初始化
+    if(WEB::is_default_start_wifi.read()){//是否默认启动web
+      wifi_mode_t wifi_mode=WEB::wifi_default_ap_mode.read()?WIFI_MODE_AP:WIFI_MODE_STA;//AP还是STA模式
+      WEB::setup(wifi_mode,WEB::default_wifi_ssid.read(),WEB::default_wifi_password.read());//启动web
+    }
     /*初始化相关外设*/
 
 
@@ -110,7 +113,6 @@ void setup() {
     /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/
     delay(2000);// 延时防止重启
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
-    shell.println("hello shell");
 }
 
 // Arduino主循环,本项目不使用

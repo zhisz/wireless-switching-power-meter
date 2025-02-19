@@ -163,7 +163,7 @@ const char index_html[] PROGMEM = R"=====(
         .then(data => {
           document.getElementById('voltage').innerText = sprintfFloat(parseFloat(data.voltage), 4);
           document.getElementById('current').innerText = sprintfFloat(parseFloat(data.current), 4);
-          document.getElementById('power').innerText = sprintfFloat(parseFloat(data.power), 4);
+          document.getElementById('power').innerText = sprintfFloat(parseFloat(data.voltage) * parseFloat(data.current), 4);
           document.getElementById('mah').innerText = sprintfFloat(parseFloat(data.mah), 4);
         })
         .catch(err => console.error('获取数据失败:', err));

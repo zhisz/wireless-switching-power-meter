@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXC战队nvs储存系统二次封装库，用于储存变量到NVS
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-19 11:31:41
+ * @LastEditTime: 2025-02-19 17:08:29
  */
 #ifndef HXC_NVS_HPP
 #define HXC_NVS_HPP
@@ -127,7 +127,7 @@ class NVS_DATA<String> : public NVS_Base {
     esp_err_t save(){
         if(!is_setup){setup();} // 如果未初始化，则先初始化
 
-        esp_err_t err = nvs_set_blob(NVS_Base::_handle, key.c_str(),value.c_str(),value.length()); // 将数据写入NVS
+        esp_err_t err = nvs_set_blob(NVS_Base::_handle, key.c_str(),value.c_str(),value.length()+1); // 将数据写入NVS,value.length()不包括'\0' 所以需要+1否则会出错
         if(err){
             log_e("nvs_set_blob fail: %s %s", key.c_str(), nvs_error(err)); // 如果写入失败，记录错误信息
         }

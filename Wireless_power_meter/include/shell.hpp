@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-25 21:58:06
+ * @LastEditTime: 2025-02-19 17:48:46
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
@@ -11,6 +11,7 @@
 #include "static/HXC_NVS.hpp"
 #include "static/POWERMETER.hpp"
 #include "OTHER_FUNCTION.hpp"
+#include "web.hpp"
 namespace SHELL{
 
 
@@ -23,6 +24,11 @@ namespace SHELL{
 
         // info 打印信息
         shell.addCommand(F("info 显示编译信息"),[](int argc, char** argv){
+            #ifdef IS_PRO_VERSION
+            shell.println(F("Pro Version"));
+            #else
+            shell.println(F("Normal Version"));
+            #endif
             shell.println(F( "Built " __DATE__));
             return 0;
         });
@@ -140,8 +146,8 @@ namespace SHELL{
             OTHER_FUNCTION::temperature_protect_ctrl(state);
             return 0;
         });
-
-        shell.addCommand(F("printDATA 打印电压电流功率数据 [开关打印]"),[](int argc, char** argv){
+        //printDATA 打印电压电流功率数据 
+        shell.addCommand(F("printDATA 打印电压电流功率数据\n  printDATA [开关打印]"),[](int argc, char** argv){
             if(argc!=2){
                 shell.println(F("参数错误"));
                 return -1;
@@ -150,6 +156,59 @@ namespace SHELL{
             OTHER_FUNCTION::serial_print_ctrl(state);
             return 0;
         });
+
+        //wifi 开启网页功能
+        shell.addCommand(F("wifi [开关wifi服务] [是AP模式] [wifi名称] [wifi密码 null为无密码 ]"),[](int argc, char** argv){
+            if(argc<2){
+                shell.println(F("参数错误\n wifi [开关wifi服务] [是AP模式] [wifi名称] [wifi密码 null为无密码 ]"));
+                return -1;
+            };
+            
+            //设置是否开启wifi和web
+            WEB::is_default_start_wifi=atoi(argv[1]);
+            
+            if(argc>=3){
+                //设置wifi模式 1为AP模式 0为STA模式
+                WEB::wifi_default_ap_mode=atoi(argv[2]);
+            }
+            if(argc>=4){
+                //设置wifi名称
+                String ssid=argv[3];
+                shell.printf("wifi名称:%s\n",ssid.c_str());
+                WEB::default_wifi_ssid=ssid;
+            }
+            
+            if(argc>=5){
+                //设置wifi密码
+                String password=argv[4];
+                if(password=="null"){
+                    password="";
+                }
+                shell.printf("wifi密码:%s\n",password.c_str());
+                WEB::default_wifi_password=password;
+            }
+            shell.println(F("wifi 状态设置成功 马上重启"));
+            delay(1000);
+            ESP.restart();
+            return 0;
+        });
+
+        //get_ip
+        shell.addCommand(F("get_ip 获取ip"),[](int argc, char** argv){
+            String ip="error";
+            if(WiFi.getMode()!=WIFI_MODE_STA){//是AP模式
+                shell.println("AP模式");
+                shell.printf("AP ssid:%s\n",WiFi.softAPSSID().c_str());
+                ip=WiFi.softAPIP().toString();
+            }else{
+                shell.println(F("STA模式"));
+                ip=WiFi.localIP().toString();
+            }
+
+            shell.println(ip);
+            return 0;
+        });
+
     }
 
 

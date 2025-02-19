@@ -5,8 +5,21 @@ import os
 
 # 定义要嵌入的文件
 files_to_embed = []
+src_dir_path="include/web/src"
+header_dir_path="include/web/c_header"
+
+# 清空c_header
+def clear_folder(folder_path):
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            os.remove(file_path)
+
+clear_folder(header_dir_path)
+     
+
 # 遍历include/web/src
-for root, dirs, files in os.walk("include/web/src"):
+for root, dirs, files in os.walk(src_dir_path):
     for file in files:
         file_path = os.path.join(root, file)
         #替换空格,-,点为_
@@ -25,7 +38,9 @@ for var_name, file_path in files_to_embed:
     header_content = header_content+f"const char {var_name}[] PROGMEM = R\"=====(\n{content}\n)=====\";\n"
 
     header_content = header_content+"#endif\n"
-    file_name="include/web/c_header/{var}.h".format(var=var_name)
+    
+    file_name="/{var}.h".format(var=var_name)
+    file_name=header_dir_path+file_name
     # 写入头文件
     with open(file_name, "w", encoding="utf-8") as f:
         f.write(header_content)

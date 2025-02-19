@@ -3,7 +3,7 @@
  * @Description: 功率表相关部分
  * @note: 该文件为普通版本和PRO版本的功率表的实现，通过宏 IS_PRO_VERSION 来控制 在pltformio.ini 中添加宏定义来控制是PRO版本还是普通版
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-19 11:34:51
+ * @LastEditTime: 2025-02-19 16:21:52
  */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
@@ -13,12 +13,12 @@
 #include "HXC_NVS.hpp"
 
 #ifdef IS_PRO_VERSION
-#pragma message("------------------PRO VERSION------------------")
+#pragma warning("------------------PRO VERSION------------------")
 //↓↓↓↓↓↓↓↓↓↓PRO版本↓↓↓↓↓↓↓↓↓↓
 #include <Adafruit_INA228.h>//INA228 PRO版本
 //↑↑↑↑↑↑↑↑↑↑PRO版本↑↑↑↑↑↑↑↑↑↑
 #else
-#pragma message("------------------NORMAL VERSION------------------")
+#pragma warning("------------------NORMAL VERSION------------------")
 //↓↓↓↓↓↓↓↓↓↓普通版↓↓↓↓↓↓↓↓↓↓
 #include "INA226.h"//INA226 普通版本
 //↑↑↑↑↑↑↑↑↑↑普通版↑↑↑↑↑↑↑↑↑↑
