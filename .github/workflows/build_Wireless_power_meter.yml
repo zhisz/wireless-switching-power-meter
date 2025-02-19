@@ -1,4 +1,4 @@
-name: Build Wireless_power_meter
+name: 功率计代码代码CI/CD
 
 on: [push]  # 触发条件，这里是代码被推送到仓库时
 

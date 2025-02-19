@@ -1,4 +1,4 @@
-name: Build stopbutton
+name: 急停开关代码CI/CD
 
 on: [push]  # 触发条件，这里是代码被推送到仓库时
 
