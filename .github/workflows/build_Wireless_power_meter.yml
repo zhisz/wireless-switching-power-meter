@@ -23,6 +23,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')  # 如果是标签推送，则执行Release操作
       with:
-        files: Wireless_power_meter/.pio/build/Wireless_power_meter/Wireless_power_meter_4MB.bin  # 上传的文件路径
+        files: |
+          Wireless_power_meter/.pio/build/Wireless_power_meter/Wireless_power_meter_4MB.bin  # 上传的文件路径
+          Wireless_power_meter/.pio/build/Wireless_power_meter_pro/Wireless_power_meter_pro_4MB.bin  # 上传的文件路径
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用GitHub提供的token

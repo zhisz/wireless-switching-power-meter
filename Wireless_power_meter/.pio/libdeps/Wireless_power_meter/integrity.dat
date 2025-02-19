@@ -1,3 +1,4 @@
+bodmer/TFT_eSPI@^2.5.43
+bblanchon/ArduinoJson@^7.3.0
 robtillaart/INA226@^0.5.3
 mathertel/OneButton@^2.6.1
-bodmer/TFT_eSPI@^2.5.43
