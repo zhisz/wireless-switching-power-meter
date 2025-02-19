@@ -28,11 +28,8 @@
 
 本工程使用github action实现CI/CD流程
 
-该工程的配置为当有新的版本```tag```时(带```v```的tag)
-例如：
-```v1.2.1```
-```v10.1```
-```v12```
+该工程的配置为当有新的版本```tag```时
+
 **并且标签推送到仓库**即可生成固件到仓库的release
 
 #### 使用在线vscode创建本地标签
@@ -40,6 +37,11 @@
 ![alt text](./.github/image4.png)
 ![alt text](./.github/image5.png)
 #### 使用命令行推送标签
+创建本地标签后点击命令行输入
+```git push --tag```
+
+回车后过几分钟固件即可自动上传到release处
+![alt text](./.github/image6.png)
 # 工程介绍
 ## Wireless_power_meter
 功率计本体代码，pro版本和普通版均为此工程
