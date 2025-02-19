@@ -18,8 +18,8 @@ jobs:
       run: |
         cd ./Wireless_power_meter
         pio run
-        ls -R Wireless_power_meter/.pio/build/Wireless_power_meter
-        ls -R Wireless_power_meter/.pio/build/Wireless_power_meter_pro
+        ls -R ${{ github.workspace }}/Wireless_power_meter/.pio/build/Wireless_power_meter
+        ls -R ${{ github.workspace }}/Wireless_power_meter/.pio/build/Wireless_power_meter_pro
 
     - name: Create Release and Upload Bin  # 创建Release并上传.bin文件
       uses: softprops/action-gh-release@v1
