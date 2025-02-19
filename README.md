@@ -17,8 +17,29 @@
 ### 1.fork工程
 ### 2.github页面编辑 
 按下键盘的```,```按键进入在线编辑
-### 3.提交更改
+![alt text](./.github/image2.png)
+### 3.修改代码，提交更改
+此时与用电脑的vscode打开工程文件无区别
+
+当修改完成代码后提交git保存
 ![alt text](./.github/image.png)
+
+### 4.创建标签编译
+
+本工程使用github action实现CI/CD流程
+
+该工程的配置为当有新的版本```tag```时(带```v```的tag)
+例如：
+```v1.2.1```
+```v10.1```
+```v12```
+**并且标签推送到仓库**即可生成固件到仓库的release
+
+#### 使用在线vscode创建本地标签
+![alt text](./.github/image3.png)
+![alt text](./.github/image4.png)
+![alt text](./.github/image5.png)
+#### 使用命令行推送标签
 # 工程介绍
 ## Wireless_power_meter
 功率计本体代码，pro版本和普通版均为此工程
