@@ -16,12 +16,12 @@
 
 - 本工程提供[使用github生成固件，无需搭建开发环境的教程](#使用github生成固件，无需搭建开发环境)
 # 工程介绍
-## Wireless_power_meter
+## 功率计本体
 功率计本体代码，pro版本和普通版均为此工程
 
 默认编译会生成两种固件，pro版本和普通版，可以自行选择
 
-文件树和备注如下
+### 文件树和备注
 ```
 Wireless_power_meter
 ├── include //模块文件，主要的代码均在这里
@@ -59,7 +59,7 @@ Wireless_power_meter
 └── src
     └── main.cpp //主函数
 ```
-**注意**
+#### **注意**
 
 PIO默认上传是PRO版本，如果想要普通版，需要在platformio.ini中注释另外一个版本的环境配置
 
@@ -82,6 +82,123 @@ lib_deps =
 	robtillaart/INA226@^0.5.3
 
 ```
+### 后端API 文档
+
+#### 1. 获取功率数据
+
+**URL:** `/data`
+
+**Method:** `GET`
+
+**Description:**  
+该 API 用于获取当前的功率数据，包括电压、电流、累计功耗、输出状态以及当前时间。
+
+**Response:**
+
+- **Status Code:** `200 OK`
+- **Content-Type:** `application/json`
+
+**Response Body:**
+
+```json
+{
+  "voltage": float,       // 电压值
+  "current": float,       // 电流值
+  "mah": float,           // 累计功耗（毫安时）
+  "state": bool,          // 输出状态（true 或 false）
+  "time": unsigned long   // 当前时间（毫秒）
+}
+```
+
+**Example Response:**
+
+```json
+{
+  "voltage": 12.3,
+  "current": 1.5,
+  "mah": 4500.0,
+  "state": true,
+  "time": 123456
+}
+```
+
+---
+
+#### 2. 控制输出状态
+
+**URL:** `/ctrl`
+
+**Method:** `POST`
+
+**Description:**  
+该 API 用于控制电源输出的开关状态。通过发送 JSON 格式的请求体来设置输出状态。
+
+**Request Body:**
+
+```json
+{
+  "state": bool  // 输出状态（true 表示关闭，false 表示开启）
+}
+```
+
+**Response:**
+
+- **Status Code:** `200 OK` (成功)
+- **Status Code:** `400 Bad Request` (JSON 解析失败)
+- **Content-Type:** `text/plain`
+
+**Response Body:**
+
+- 成功时返回：`"OK"`
+- 失败时返回：`"JSON 解析失败"`
+
+**Example Request:**
+
+```json
+{
+  "state": true
+}
+```
+
+**Example Response:**
+
+```
+OK
+```
+
+---
+
+#### 错误处理
+
+- **400 Bad Request:** 如果请求体中的 JSON 数据无法解析，服务器将返回 `400 Bad Request` 状态码，并附带错误信息 `"JSON 解析失败"`。
+
+---
+
+#### 注意事项
+
+1. **时间戳:** `/data` API 返回的时间戳是自设备启动以来的毫秒数（`millis()`）。
+2. **输出状态:** `/ctrl` API 中的 `state` 字段为 `true` 时表示关闭输出，为 `false` 时表示开启输出。
+3. **JSON 格式:** 请确保发送的 JSON 数据格式正确，否则会导致解析失败。
+
+---
+
+#### 示例代码
+
+##### 获取功率数据 (GET /data)
+
+```bash
+curl -X GET http://<server-ip>/data
+```
+
+##### 控制输出状态 (POST /ctrl)
+
+```bash
+curl -X POST http://<server-ip>/ctrl -d '{"state": true}' -H "Content-Type: application/json"
+```
+
+- ```<server-ip>```:功率计的ip地址，可通过串口控制台```get_ip```命令获取
+---
+
 ## mini开关代码
 文件树和备注如下
 ```
