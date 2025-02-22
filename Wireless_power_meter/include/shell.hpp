@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-19 17:48:46
+ * @LastEditTime: 2025-02-22 22:03:57
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
@@ -62,7 +62,7 @@ namespace SHELL{
                 shell.println(F("参数错误"));
                 return -1;
             };
-            uint16_t key=atoi(argv[1]);
+            uint16_t key=std::stoi(argv[1],nullptr,0);
             if(key<=0||key>0xFFFF){
                 shell.println(F("参数错误"));
                 shell.printf("你输入的:0x%X",key);
