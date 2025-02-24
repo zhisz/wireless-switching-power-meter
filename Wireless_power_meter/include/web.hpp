@@ -3,13 +3,13 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 网页控制相关代码
  * @author: qingmeijiupiao
- * @LastEditTime: 2025-02-19 17:39:45
+ * @LastEditTime: 2025-02-24 12:38:00
  */
 #ifndef WEB_HPP
 #define WEB_HPP
-#include <WiFi.h>
-#include <DNSServer.h>
-#include <WebServer.h>
+#include <WiFi.h> //ESP32 Arduino SDK库
+#include <DNSServer.h> //ESP32 Arduino SDK库
+#include <WebServer.h> //ESP32 Arduino SDK库
 #include <ArduinoJson.h>
 #include "web/c_header/index_html.h"// 前端文件，这个头文件是自动生成的，源文件在include/web/src/
 #include "static/HXCthread.hpp"

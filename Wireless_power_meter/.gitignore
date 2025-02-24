@@ -3,14 +3,5 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-.pio/libdeps/Wireless_power_meter_pro/Adafruit BusIO
-.pio/libdeps/Wireless_power_meter_pro/Adafruit INA228 Library
-.pio/libdeps/Wireless_power_meter_pro/ArduinoJson
-.pio/libdeps/Wireless_power_meter_pro/OneButton
-.pio/libdeps/Wireless_power_meter_pro/INA226
-.pio/libdeps/Wireless_power_meter/Adafruit BusIO
-.pio/libdeps/Wireless_power_meter/Adafruit INA228 Library
-.pio/libdeps/Wireless_power_meter/ArduinoJson
-.pio/libdeps/Wireless_power_meter/OneButton
-.pio/libdeps/Wireless_power_meter/INA226
+.pio/libdeps
 web/c_header
