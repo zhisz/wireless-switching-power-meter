@@ -1,5 +1,5 @@
 # 无线开关功率计
-## 仓库的README文件主要介绍源代码相关，功能介绍请到嘉立创详情页
+## 仓库的README文件主要介绍源代码相关，功能介绍请到[嘉立创详情页](https://oshwhub.com/qingmeijiupiao/wireless-switching-power-meter)
 
 ![mini开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/mini开关代码编译检查.yml/badge.svg)  ![急停开关代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/急停开关代码编译检查.yml/badge.svg)  ![功率计代码编译检查](https://github.com/CQUPTHXC/wireless-switching-power-meter/actions/workflows/功率计代码编译检查.yml/badge.svg)
 # 项目介绍和功能介绍
@@ -13,48 +13,15 @@
 - 使用vscode安装PlatformIO后打开代码文件夹即可编译运行
 
 - 注意不可直接打开根目录，只能打开项目文件夹，否则PlatformIO无法识别
-## 使用github生成固件，无需搭建开发环境
-### 1.fork工程
-![alt text](./.github/image7.png)
-### 2.github页面编辑 
 
-**在自己fork的工程页面下，按下键盘的```,```按键进入在线编辑**
-
-
-![alt text](./.github/image2.png)
-### 3.修改代码，提交更改
-此时与用电脑的vscode打开工程文件无区别
-
-当修改完成代码后提交git保存
-![alt text](./.github/image.png)
-
-### 4.创建标签编译
-
-本工程使用github action实现CI/CD流程
-
-该工程的配置为当有新的版本```tag```时
-
-**并且标签推送到仓库**即可生成固件到仓库的release
-
-#### 使用在线vscode创建本地标签
-![alt text](./.github/image3.png)
-![alt text](./.github/image4.png)
-![alt text](./.github/image5.png)
-#### 使用命令行推送标签
-创建本地标签后点击命令行输入
-```git push --tag```
-
-回车后过几分钟固件即可自动上传到release处
-![alt text](./.github/image6.png)
-![alt text](./.github/image8.png)
-### 5.按照[固件烧录](#固件烧录)处教程烧录固件
+- 本工程提供[使用github生成固件，无需搭建开发环境的教程](#使用github生成固件，无需搭建开发环境)
 # 工程介绍
-## Wireless_power_meter
+## 功率计本体
 功率计本体代码，pro版本和普通版均为此工程
 
 默认编译会生成两种固件，pro版本和普通版，可以自行选择
 
-文件树和备注如下
+### 文件树和备注
 ```
 Wireless_power_meter
 ├── include //模块文件，主要的代码均在这里
@@ -92,7 +59,7 @@ Wireless_power_meter
 └── src
     └── main.cpp //主函数
 ```
-**注意**
+#### **注意**
 
 PIO默认上传是PRO版本，如果想要普通版，需要在platformio.ini中注释另外一个版本的环境配置
 
@@ -115,6 +82,123 @@ lib_deps =
 	robtillaart/INA226@^0.5.3
 
 ```
+### 后端API 文档
+
+#### 1. 获取功率数据
+
+**URL:** `/data`
+
+**Method:** `GET`
+
+**Description:**  
+该 API 用于获取当前的功率数据，包括电压、电流、累计功耗、输出状态以及当前时间。
+
+**Response:**
+
+- **Status Code:** `200 OK`
+- **Content-Type:** `application/json`
+
+**Response Body:**
+
+```json
+{
+  "voltage": float,       // 电压值
+  "current": float,       // 电流值
+  "mah": float,           // 累计功耗（毫安时）
+  "state": bool,          // 输出状态（true 或 false）
+  "time": unsigned long   // 当前时间（毫秒）
+}
+```
+
+**Example Response:**
+
+```json
+{
+  "voltage": 12.3,
+  "current": 1.5,
+  "mah": 4500.0,
+  "state": true,
+  "time": 123456
+}
+```
+
+---
+
+#### 2. 控制输出状态
+
+**URL:** `/ctrl`
+
+**Method:** `POST`
+
+**Description:**  
+该 API 用于控制电源输出的开关状态。通过发送 JSON 格式的请求体来设置输出状态。
+
+**Request Body:**
+
+```json
+{
+  "state": bool  // 输出状态（true 表示关闭，false 表示开启）
+}
+```
+
+**Response:**
+
+- **Status Code:** `200 OK` (成功)
+- **Status Code:** `400 Bad Request` (JSON 解析失败)
+- **Content-Type:** `text/plain`
+
+**Response Body:**
+
+- 成功时返回：`"OK"`
+- 失败时返回：`"JSON 解析失败"`
+
+**Example Request:**
+
+```json
+{
+  "state": true
+}
+```
+
+**Example Response:**
+
+```
+OK
+```
+
+---
+
+#### 错误处理
+
+- **400 Bad Request:** 如果请求体中的 JSON 数据无法解析，服务器将返回 `400 Bad Request` 状态码，并附带错误信息 `"JSON 解析失败"`。
+
+---
+
+#### 注意事项
+
+1. **时间戳:** `/data` API 返回的时间戳是自设备启动以来的毫秒数（`millis()`）。
+2. **输出状态:** `/ctrl` API 中的 `state` 字段为 `true` 时表示关闭输出，为 `false` 时表示开启输出。
+3. **JSON 格式:** 请确保发送的 JSON 数据格式正确，否则会导致解析失败。
+
+---
+
+#### 示例代码
+
+##### 获取功率数据 (GET /data)
+
+```bash
+curl -X GET http://<server-ip>/data
+```
+
+##### 控制输出状态 (POST /ctrl)
+
+```bash
+curl -X POST http://<server-ip>/ctrl -d '{"state": true}' -H "Content-Type: application/json"
+```
+
+- ```<server-ip>```:功率计的ip地址，可通过串口控制台```get_ip```命令获取
+---
+
 ## mini开关代码
 文件树和备注如下
 ```
@@ -182,6 +266,43 @@ void loop(){
     //Serial.println(PowerCtrl::power_data.current);
 }
 ```
+
+
+# 使用github生成固件，无需搭建开发环境
+## 1.fork工程
+![alt text](./.github/image7.png)
+## 2.github页面编辑 
+
+**在自己fork的工程页面下，按下键盘的```,```按键进入在线编辑**
+
+
+![alt text](./.github/image2.png)
+## 3.修改代码，提交更改
+此时与用电脑的vscode打开工程文件无区别
+
+当修改完成代码后提交git保存
+![alt text](./.github/image.png)
+
+## 4.创建标签编译
+
+本工程使用github action实现CI/CD流程
+
+该工程的配置为当有新的版本```tag```时
+
+**并且标签推送到仓库**即可生成固件到仓库的release
+
+### 使用在线vscode创建本地标签
+![alt text](./.github/image3.png)
+![alt text](./.github/image4.png)
+![alt text](./.github/image5.png)
+### 使用命令行推送标签
+创建本地标签后点击命令行输入
+```git push --tag```
+
+回车后过几分钟固件即可自动上传到release处
+![alt text](./.github/image6.png)
+![alt text](./.github/image8.png)
+## 5.按照[固件烧录](#固件烧录)处教程烧录固件
 
 # 固件烧录
 如果不想搭建开发环境也可以选择直接烧录固件
