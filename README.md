@@ -59,6 +59,7 @@ Wireless_power_meter
 └── src
     └── main.cpp //主函数
 ```
+
 #### **注意**
 
 PIO默认上传是PRO版本，如果想要普通版，需要在platformio.ini中注释另外一个版本的环境配置
@@ -82,6 +83,16 @@ lib_deps =
 	robtillaart/INA226@^0.5.3
 
 ```
+### 串口控制台
+
+目前v1.2.1版本功率计本体和mini开关可用
+**注意**
+- 字符编码为UTF-8
+- 换行为"\r\n"即CRLF
+- 由于是虚拟串口，波特率可以为任意值
+[点击打开在线串口助手](https://serial.keysking.com/)
+使用时点左下角软件设置，设置换行为CRLF
+
 ### 后端API 文档
 
 #### 1. 获取功率数据
@@ -199,6 +210,20 @@ curl -X POST http://<server-ip>/ctrl -d '{"state": true}' -H "Content-Type: appl
 - ```<server-ip>```:功率计的ip地址，可通过串口控制台```get_ip```命令获取
 ---
 
+### 文件修改指南
+#### 修改页面
+在```./include/SCREEN.hpp```文件中修改页面,以及修改页面顺序，添加页面
+#### 控制台命令
+在```./include/shell.hpp```文件中修改控制台命令
+#### web
+在```./include/web/src/index.html```文件中修改web前端
+在```./include/web.hpp```文件中修改web后端
+#### 保护功能 
+在```./include/OTHER_FUNCTION.hpp```文件中修改电压/电流/温度保护源码
+#### 无线控制 
+在```./include/WIRELESSCTRL.hpp```文件中修改无线控制
+#### 曲线记录时间
+在```./include/static/POWERMETER.hpp```文件中修改数据曲线记录时间
 ## mini开关代码
 文件树和备注如下
 ```
