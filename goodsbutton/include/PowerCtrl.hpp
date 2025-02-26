@@ -30,6 +30,7 @@ namespace PowerCtrl{
     void send_pair_package(){
         uint8_t self_mac[6];
         WiFi.macAddress(self_mac);
+        Serial.printf("self_mac:%02X:%02X:%02X:%02X:%02X:%02X\n",self_mac[0],self_mac[1],self_mac[2],self_mac[3],self_mac[4],self_mac[5]);
         esp_now_send_package("pair",self_mac,6,broadcastMacAddress);
 
     }
@@ -74,6 +75,7 @@ namespace PowerCtrl{
     }
     //配对回调
     void paircallback(HXC_ESPNOW_data_pakage receive_data){
+        Serial.println("配对成功");
         add_esp_now_peer_mac(receive_data.data);
         //保存数据到NVS
         pair_mac=receive_data.data;

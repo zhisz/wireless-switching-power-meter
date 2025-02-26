@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-22 22:01:17
+ * @LastEditTime: 2025-02-25 10:21:59
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
@@ -93,6 +93,21 @@ namespace SHELL{
             shell.println("配对MAC列表:");
             for (auto i=peer_mac_list.begin();i!=peer_mac_list.end();i++){
                 shell.printf("%02X:%02X:%02X:%02X:%02X:%02X\n",i->mac[0],i->mac[1],i->mac[2],i->mac[3],i->mac[4],i->mac[5]);
+            }
+            return 0;
+        });
+
+        //ctrl 控制
+        shell.addCommand(F("ctrl [开关输出]"),[](int argc, char** argv){
+            if(argc!=2){
+                shell.println(F("参数错误"));
+                return -1;
+            };
+            bool state=atoi(argv[1]);
+            if(state){
+                PowerCtrl::power_on();
+            }else{
+                PowerCtrl::power_off();
             }
             return 0;
         });

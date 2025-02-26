@@ -26,21 +26,23 @@ void resret(){
 HXC::thread<std::tuple<uint32_t,float>> LED_blink_task([](std::tuple<uint32_t,float> arg){
     uint32_t count=std::get<0>(arg);
     float led_HZ=std::get<1>(arg);
+    Serial.printf("LED_blink_task start,count=%d,led_HZ=%f\n",count,led_HZ);
+    digitalWrite(10,LOW);
     for(int i=0;i<count;i++){
-        digitalWrite(10,LOW);
-        delay(500.f/HZ);
         digitalWrite(10,HIGH);
-        delay(500.f/HZ);
+        delay(500.f/led_HZ);
+        digitalWrite(10,LOW);
+        delay(500.f/led_HZ);
     }
 });
-
+static std::tuple<uint32_t,float> arg=std::make_tuple(/*闪烁次数=*/30,/*闪烁频率=*/2.f);
 void setup() {
 
     pinMode(0,INPUT_PULLUP);
     pinMode(10,OUTPUT);
     pinMode(2,INPUT_PULLDOWN);
 
-
+    Serial.begin(115200);
     change_secret_key(esp_now_secret_key.read());
     PowerCtrl::setup();
 
@@ -59,13 +61,6 @@ void setup() {
                 LED_blink_task.join();//等待线程结束
                 is_send=true;
             }
-            if(press_time>10000){
-                //发送配对
-                PowerCtrl::send_pair_package();
-                //LED闪烁
-                LED_blink_task.start(std::make_tuple(/*闪烁次数=*/10,/*闪烁频率=*/10),"LED_blink_task",512);
-                LED_blink_task.join();//等待线程结束
-            }
         }
         digitalWrite(10,LOW);
         esp_deep_sleep_enable_gpio_wakeup(1<<GPIO_NUM_0,ESP_GPIO_WAKEUP_GPIO_LOW);//开启GPIO0中断
@@ -81,5 +76,9 @@ void setup() {
     }
 }
 
-void loop() {}
+void loop() {
+
+
+
+}
 
