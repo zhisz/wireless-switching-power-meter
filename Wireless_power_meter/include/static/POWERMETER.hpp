@@ -3,7 +3,7 @@
  * @Description: 功率表相关部分
  * @note: 该文件为普通版本和PRO版本的功率表的实现，通过宏 IS_PRO_VERSION 来控制 在pltformio.ini 中添加宏定义来控制是PRO版本还是普通版
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-03-27 16:19:22
+ * @LastEditTime: 2025-03-27 16:24:05
  */
 #ifndef POWERMETER_HPP
 #define POWERMETER_HPP
@@ -33,7 +33,7 @@ namespace POWERMETER {
     constexpr float sample_resistance_default = 2.0;
     #endif
 
-    HXC::NVS_DATA<float> sample_resistance("resistance",sample_resistance_default);// NVS数据，采样电阻的值，默认为2mΩ
+    HXC::NVS_DATA<float> sample_resistance("resistance",sample_resistance_default);// NVS数据，采样电阻的值，默认为sample_resistance_default
     constexpr int READ_HZ = 100;                  // 读取电压电流的频率
     constexpr int data_save_time=6;              // 保存数据的时间 秒
     float voltage = 0;                       // 电压

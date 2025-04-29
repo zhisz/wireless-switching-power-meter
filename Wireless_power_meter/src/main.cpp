@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-19 17:10:33
+ * @LastEditTime: 2025-04-22 10:00:17
  */
 /*
                                               .=%@#=.
@@ -114,6 +114,7 @@ void setup() {
     delay(2000);// 延时防止重启
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
 }
+
 
 // Arduino主循环,本项目不使用
 void loop() {}

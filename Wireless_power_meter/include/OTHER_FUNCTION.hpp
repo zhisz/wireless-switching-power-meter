@@ -77,6 +77,7 @@ namespace OTHER_FUNCTION{
     HXC::NVS_DATA<float> low_voltage_protect_value("low_voltage_value",12);// 电压保护值,单位V
     // 低电压保护任务
     HXC::thread<void> voltage_protect_thread([](){
+        delay(5000);// 延时5秒，等待电压稳定
         while (true){
             if(POWERMETER::voltage<low_voltage_protect_value){
                 power_output.off();
