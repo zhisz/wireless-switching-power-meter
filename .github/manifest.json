@@ -1,0 +1,17 @@
+{
+    "name": "Wireless Switching Power Meter",
+    "description": "固件用于无线开关电源计量",
+    "url": "https://github.com/CQUPTHXC/wireless-switching-power-meter",
+    "firmwares": [
+        {
+            "name": "GoodsButton v1.2.3 (4MB)",
+            "chipFamily": "ESP32C3",
+            "binaries": [
+                {
+                    "path": "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.3/goodsbutton_4MB.bin",
+                    "offset": "0x0"
+                }
+            ]
+        }
+    ]
+}
