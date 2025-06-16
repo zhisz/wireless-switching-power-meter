@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-06-16 10:45:31
+ * @LastEditTime: 2025-06-16 11:14:26
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
@@ -114,7 +114,7 @@ namespace SHELL{
         });
 
         
-        // remoteprint 远程打印
+        // remoteprint 远程打印 查看lib目录下的remotePrint文件夹获取使用方法
         shell.addCommand(F("remoteprint [开关远程打印]"),[](int argc, char** argv){
             if(argc!=2){
                 shell.println(F("参数错误"));

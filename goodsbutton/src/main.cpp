@@ -23,18 +23,43 @@ void resret(){
  * @param {uint32_t} 闪烁次数
  * @param {float} 闪烁频率
  */
-HXC::thread<std::tuple<uint32_t,float>> LED_blink_task([](std::tuple<uint32_t,float> arg){
+auto arg=std::make_tuple(/*闪烁次数=*/3,/*闪烁频率=*/5);
+HXC::thread<void> LED_blink_task([](void){
     uint32_t count=std::get<0>(arg);
-    float led_HZ=std::get<1>(arg);
-    Serial.printf("LED_blink_task start,count=%d,led_HZ=%f\n",count,led_HZ);
+    uint32_t led_HZ=std::get<1>(arg);
     digitalWrite(10,LOW);
     for(int i=0;i<count;i++){
         digitalWrite(10,HIGH);
-        delay(500.f/led_HZ);
+        delay(500/led_HZ);
         digitalWrite(10,LOW);
-        delay(500.f/led_HZ);
+        delay(500/led_HZ);
     }
 });
+
+static int last_press_time=0;
+HXC::thread<void> long_press_task([](){
+    for(int i=0;i<100;i++){
+        if(digitalRead(0)){
+            digitalWrite(10,HIGH);
+            return ;
+        }
+        delay(10);
+    }
+    PowerCtrl::power_on();
+    
+    //LED闪烁
+    LED_blink_task.start("LED_blink_task",512);
+    LED_blink_task.join();//等待线程结束
+    digitalWrite(10,HIGH);
+    
+});
+void button_press_cb(){
+    digitalWrite(10,LOW);
+    PowerCtrl::power_off();
+    last_press_time=millis();
+    long_press_task.start("long_press_task",2048);
+}
+
 void setup() {
 
     pinMode(0,INPUT_PULLUP);
@@ -56,7 +81,7 @@ void setup() {
             if(press_time>1000&&!is_send){
                 PowerCtrl::power_on();
                 //LED闪烁
-                LED_blink_task.start(std::make_tuple(/*闪烁次数=*/3,/*闪烁频率=*/5),"LED_blink_task",512);
+                LED_blink_task.start("LED_blink_task",512);
                 LED_blink_task.join();//等待线程结束
                 is_send=true;
             }
@@ -66,6 +91,7 @@ void setup() {
         esp_deep_sleep_enable_gpio_wakeup(1<<GPIO_NUM_2,ESP_GPIO_WAKEUP_GPIO_HIGH);//开启GPIO2中断
         esp_deep_sleep_start();//进入睡眠
     }else{
+        attachInterrupt(0, button_press_cb, FALLING);
         if(remotePrint.read()){
             add_esp_now_callback("remotePrint",[](HXC_ESPNOW_data_pakage receive_data){
                 Serial.write(receive_data.data,receive_data.data_len);
@@ -74,15 +100,10 @@ void setup() {
         digitalWrite(10,HIGH);
         Serial.begin(115200);
         attachInterrupt(2, resret, FALLING);
-        attachInterrupt(0,PowerCtrl::power_off,FALLING);
         SHELL::shell_thread.start("SHELL",8192);
 
     }
 }
 
-void loop() {
-
-
-
-}
+void loop() {}
 
