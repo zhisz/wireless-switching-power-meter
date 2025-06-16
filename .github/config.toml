@@ -1,27 +1,27 @@
 esp_toml_version = 1.0
-firmware_images_url = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4"
+firmware_images_url = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases"
 supported_apps = ["Wireless_power_meter_pro","Wireless_power_meter","goodsbutton","stopbutton"]
 
 ["Wireless_power_meter_pro"]
-image.esp32c3 = "Wireless_power_meter_pro_4MB.bin"
+image.esp32c3 = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/Wireless_power_meter_pro_4MB.bin"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
 
 ["Wireless_power_meter"]
-image.esp32c3 = "Wireless_power_meter_4MB.bin"
+image.esp32c3 = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/Wireless_power_meter_4MB.bin"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
 
 ["goodsbutton"]
-image.esp32c3 = "goodsbutton_4MB.bin"
+image.esp32c3 = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/goodsbutton_4MB.bin"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
 
 ["stopbutton"]
-image.esp32c3 = "stopbutton_4MB.bin"
+image.esp32c3 = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/stopbutton_4MB.bin"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
