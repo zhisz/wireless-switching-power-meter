@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 串口命令行相关
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-25 10:21:59
+ * @LastEditTime: 2025-06-16 10:45:31
  */
 #ifndef SHELL_HPP
 #define SHELL_HPP
@@ -11,6 +11,7 @@
 #include "HXCthread.hpp"
 #include "PowerCtrl.hpp"
 extern HXC::NVS_DATA<uint16_t> esp_now_secret_key;
+extern HXC::NVS_DATA<bool> remotePrint;
 namespace SHELL{
     // 初始化shell
     void shell_init(void){
@@ -108,6 +109,28 @@ namespace SHELL{
                 PowerCtrl::power_on();
             }else{
                 PowerCtrl::power_off();
+            }
+            return 0;
+        });
+
+        
+        // remoteprint 远程打印
+        shell.addCommand(F("remoteprint [开关远程打印]"),[](int argc, char** argv){
+            if(argc!=2){
+                shell.println(F("参数错误"));
+                return -1;
+            };
+            bool state=atoi(argv[1]);
+            if(state){
+                remotePrint=true;
+                shell.println("远程打印已开启");
+                shell.printf("当前密钥:0x%X\n",esp_now_secret_key.read());
+                uint8_t self_mac[6];
+                WiFi.macAddress(self_mac);
+                shell.printf("MAC:%02X:%02X:%02X:%02X:%02X:%02X\n",self_mac[0],self_mac[1],self_mac[2],self_mac[3],self_mac[4],self_mac[5]);
+            }else{
+                remotePrint=false;
+                shell.println("远程打印已关闭");
             }
             return 0;
         });

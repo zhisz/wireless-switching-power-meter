@@ -10,7 +10,7 @@
 #include <tuple>
 //NVS数据，用于esp_now数据包密钥
 HXC::NVS_DATA <uint16_t> esp_now_secret_key("secret_key",DEFAULT_SECRET_KEY);
-
+HXC::NVS_DATA<bool> remotePrint("remotePrint",false);
 //重启
 void resret(){
     ESP.restart();
@@ -35,7 +35,6 @@ HXC::thread<std::tuple<uint32_t,float>> LED_blink_task([](std::tuple<uint32_t,fl
         delay(500.f/led_HZ);
     }
 });
-static std::tuple<uint32_t,float> arg=std::make_tuple(/*闪烁次数=*/30,/*闪烁频率=*/2.f);
 void setup() {
 
     pinMode(0,INPUT_PULLUP);
@@ -67,11 +66,16 @@ void setup() {
         esp_deep_sleep_enable_gpio_wakeup(1<<GPIO_NUM_2,ESP_GPIO_WAKEUP_GPIO_HIGH);//开启GPIO2中断
         esp_deep_sleep_start();//进入睡眠
     }else{
+        if(remotePrint.read()){
+            add_esp_now_callback("remotePrint",[](HXC_ESPNOW_data_pakage receive_data){
+                Serial.write(receive_data.data,receive_data.data_len);
+            });
+        };
         digitalWrite(10,HIGH);
         Serial.begin(115200);
         attachInterrupt(2, resret, FALLING);
         attachInterrupt(0,PowerCtrl::power_off,FALLING);
-        SHELL::shell_thread.start("SHELL",2048);
+        SHELL::shell_thread.start("SHELL",8192);
 
     }
 }

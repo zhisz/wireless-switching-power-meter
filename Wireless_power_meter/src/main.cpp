@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 主程序，用于控制电压、电流测量、显示及按键操作等
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-04-22 10:00:17
+ * @LastEditTime: 2025-06-09 22:12:14
  */
 /*
                                               .=%@#=.
@@ -109,8 +109,8 @@ void setup() {
     BUTTON::button_detect_thread.start("button_detect",/*stacksize=*/512);// 按键任务
     POWERMETER::updatePower_thread.start("updatePower");// 电压电流更新任务
     SCREEN::updatescreen_thread.start("updatescreen",/*stacksize=*/8192);// 屏幕更新任务
-    SHELL::shell_thread.start("shell",/*stacksize=*/2048);// 串口命令行任务
-    /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/
+    SHELL::shell_thread.start("shell",/*stacksize=*/2048);// 串口命令行任务00000000000000000000000000 
+    /*↑↑↑↑↑↑↑↑创建后台任务↑↑↑↑↑↑*/ 
     delay(2000);// 延时防止重启
     WIRELESSCTRL::wireless_ctrl_setup();// 无线控制初始化
 }
