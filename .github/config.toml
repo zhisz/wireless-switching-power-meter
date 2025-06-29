@@ -1,5 +1,5 @@
 esp_toml_version = 1.0
-firmware_images_url = "https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/"
+firmware_images_url = "https://cors-anywhere.ramrod.workers.dev/?url=https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/"
 supported_apps = ["Wireless_power_meter_pro","Wireless_power_meter","goodsbutton","stopbutton"]
 
 ["Wireless_power_meter_pro"]
