@@ -83,15 +83,112 @@ lib_deps =
 	robtillaart/INA226@^0.5.3
 
 ```
+根据提供的代码，我将补全功率计本体的命令说明部分：
+
 ### 串口控制台
 
-目前v1.2.1版本功率计本体和mini开关可用
-**注意**
-- 字符编码为UTF-8
-- 换行为"\r\n"即CRLF
-- 由于是虚拟串口，波特率可以为任意值
-[点击打开在线串口助手](https://serial.keysking.com/)
-使用时点左下角软件设置，设置换行为CRLF
+目前v1.2.4版本功率计本体和mini开关可用  
+**注意**  
+- 字符编码为UTF-8  
+- 换行为"\r\n"即CRLF  
+- 由于是虚拟串口，波特率可以为任意值  
+[点击打开在线串口助手](https://serial.keysking.com/)  
+使用时点左下角软件设置，设置换行为CRLF  
+
+#### 功率计本体命令说明
+
+1. **系统信息**
+   - `info` - 显示编译信息
+     - 返回：版本类型(Pro/Normal)和编译日期
+
+2. **采样电阻配置**
+   - `set_resistance [阻值mΩ]` - 设置采样电阻值
+     - 参数：电阻值(单位mΩ，范围0-10)
+     - 示例：`set_resistance 2.5`
+   - `get_resistance` - 获取当前采样电阻值
+     - 返回：当前设置的采样电阻值(mΩ)
+
+3. **ESP-NOW无线配置**
+   - `set_esp_now_secret_key [密钥]` - 设置ESP-NOW通信密钥
+     - 参数：16进制密钥(0x0000-0xFFFF)
+     - 示例：`set_esp_now_secret_key 0xA5A5`
+     - 注意：此密钥需与配对设备保持一致
+   - `get_esp_now_secret_key` - 获取当前ESP-NOW密钥
+     - 返回：当前16进制密钥
+
+4. **保护功能配置**
+   - `get_protect_state` - 获取所有保护状态
+     - 返回：电流/电压/高温保护开关状态
+   - `set_voltage_protect [开关] [电压值V]` - 设置电压保护
+     - 参数：开关(0/1)，保护电压值(单位V)
+     - 示例：`set_voltage_protect 1 3.2`
+   - `set_current_protect [开关] [电流值A]` - 设置电流保护
+     - 参数：开关(0/1)，保护电流值(单位A，最大300)
+     - 示例：`set_current_protect 1 5.0`
+   - `set_high_temperature_protect [开关] [温度值℃]` - 设置高温保护
+     - 参数：开关(0/1)，保护温度值(单位℃，最大150)
+     - 示例：`set_high_temperature_protect 1 80`
+
+5. **数据打印控制**
+   - `printDATA [开关]` - 控制电压/电流/功率数据打印
+     - 参数：开关(0/1)
+     - 示例：`printDATA 1`
+
+6. **WiFi网络配置**
+   - `wifi [开关] [AP模式] [SSID] [密码]` - 配置WiFi参数
+     - 参数：
+       - 开关(0/1)
+       - AP模式(0:STA,1:AP)
+       - SSID(字符串)
+       - 密码("null"表示无密码)
+     - 示例：`wifi 1 0 MyWiFi mypassword`
+     - 注意：设置后会立即重启生效
+   - `get_ip` - 获取当前IP地址
+     - 返回：当前网络模式(AP/STA)和IP地址
+     - 
+#### 小开关命令说明
+
+1. **配对功能**
+   - `pair` - 发送配对请求并显示已配对设备列表
+     - 返回：已配对设备的MAC地址列表
+     - 示例：`pair`
+     - 注意：配对请求发送后会显示当前所有已配对设备
+
+2. **电源控制**
+   - `ctrl [开关状态]` - 远程控制功率计输出状态
+     - 参数：开关状态(0:关闭，1:开启)
+     - 示例：`ctrl 1` (开启功率计输出状态)
+     - 注意：此命令会立即改变功率计输出状态
+
+3. **数据打印控制**
+   - `printDATA [开关状态]` - 控制电压/电流数据打印
+     - 参数：开关状态(0:关闭，1:开启)
+     - 示例：`printDATA 1` (开启数据打印)
+     - 返回：开启后会持续打印电压,电流数据(格式:电压值,电流值)
+     - 注意：数据打印间隔为10ms
+
+4. **远程打印功能**
+   - `remoteprint [开关状态]` - 控制远程打印功能
+     - 参数：开关状态(0:关闭，1:开启)
+     - 示例：`remoteprint 1` (开启远程打印)
+     - 返回：开启后会显示当前ESP-NOW密钥和设备MAC地址
+     - 功能说明：
+       - 开启后可通过ESP-NOW接收其他设备的打印数据
+       - [需要其他设备配合remotePrint库使用](https://github.com/CQUPTHXC/wireless-switching-power-meter/tree/main/goodsbutton/lib/remotePrint)
+       - 密钥和设备MAC地址用于其他设备配置
+
+5. **ESP-NOW配置**
+   - `set_esp_now_secret_key [密钥]` - 设置ESP-NOW通信密钥
+     - 参数：16进制密钥(0x0000-0xFFFF)
+     - 示例：`set_esp_now_secret_key 0xA5A5`
+     - 注意：此密钥需与配对设备保持一致
+   - `get_esp_now_secret_key` - 获取当前ESP-NOW密钥
+     - 返回：当前16进制密钥
+
+**使用提示**：
+1. 配对前请确保所有设备使用相同的ESP-NOW密钥
+2. 所有命令在参数错误时会返回"参数错误"提示，并返回-1状态码。  
+3. WiFi配置成功后设备会自动重启。
 
 ### 后端API 文档
 
