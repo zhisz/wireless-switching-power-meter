@@ -428,16 +428,20 @@ void loop(){
 
 # 固件烧录
 如果不想搭建开发环境也可以选择直接烧录固件
+## [点击打开在线烧录固件网页](https://espressif.github.io/esp-launchpad/?flashConfigURL=https://raw.githubusercontent.com/CQUPTHXC/wireless-switching-power-meter/main/.github/config.toml)
+### 快速烧录
+该超链接中可以直接烧录编译好的固件
+![image](https://github.com/user-attachments/assets/1a1b6ce6-6951-49fc-bfe6-a870fbe30023)
 
-## [点击打开在线烧录固件网页](https://espressif.github.io/esp-launchpad/)
-## 点击DIY
+## 使用自己的固件烧录
+### 点击DIY
 ![W4Y355YRQNLEU(BMI( GJDY](https://github.com/user-attachments/assets/2e881339-f7b5-46aa-b96b-57a96852430f)
-## [在仓库release处下载固件](https://github.com/CQUPTHXC/wireless-switching-power-meter/releases)
-## 选择固件文件
+### 准备固件
+### 选择固件文件
 ![image](https://github.com/user-attachments/assets/028260c8-4358-4904-b4d5-fa7bfc0f56ec)
-## 选择烧录端口(带jtag标识)
+### 选择烧录端口(带jtag标识)
 ![image](https://github.com/user-attachments/assets/e1b11213-7d6b-41ce-82ab-d880acafc392)
-## 点击program
+### 点击program
 ![image](https://github.com/user-attachments/assets/40136ae0-8a38-4464-9b9f-aa7668f482e3)
 
 
