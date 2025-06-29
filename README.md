@@ -332,23 +332,15 @@ void loop(){
 # 固件烧录
 如果不想搭建开发环境也可以选择直接烧录固件
 
-[esp下载工具链接](https://www.espressif.com/zh-hans/support/download/other-tools)
+## [点击打开在线烧录固件网页](https://espressif.github.io/esp-launchpad/)
+## 点击DIY
+![W4Y355YRQNLEU(BMI( GJDY](https://github.com/user-attachments/assets/2e881339-f7b5-46aa-b96b-57a96852430f)
+## [在仓库release处下载固件](https://github.com/CQUPTHXC/wireless-switching-power-meter/releases)
+## 选择固件文件
+![image](https://github.com/user-attachments/assets/028260c8-4358-4904-b4d5-fa7bfc0f56ec)
+## 选择烧录端口(带jtag标识)
+![image](https://github.com/user-attachments/assets/e1b11213-7d6b-41ce-82ab-d880acafc392)
+## 点击program
+![image](https://github.com/user-attachments/assets/40136ae0-8a38-4464-9b9f-aa7668f482e3)
 
-## 下载解压后打开工具
 
-![image](https://github.com/user-attachments/assets/9eddfbf2-39a3-4faf-9804-68ef2b215977)
-
-## 选择 ESP32-C3和USB烧录
-
-![image](https://github.com/user-attachments/assets/dd5756dd-e65b-41c0-9ebf-b2a14caf6c09)
-![image](https://github.com/user-attachments/assets/3c837e4c-2ff2-4a40-8a6a-0984921df3d5)
-
-## 点击三个小点选择在[github release](https://github.com/CQUPTHXC/wireless-switching-power-meter/releases)处下载的.bin文件
-- 注意区分普通版本和PRO版本固件
-
-![image](https://github.com/user-attachments/assets/69aea8b0-c27d-409c-8d56-fd5c31565108)
-
-## 之后如图设置烧录
-烧录前需要先将esp32进入烧录模式，即：按住boot按钮再让芯片启动，电脑能够显示端口就算成功
-
-![image](https://github.com/user-attachments/assets/e8f50ed6-1cc7-48f5-b483-b88221737867)
