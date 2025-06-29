@@ -1,27 +1,31 @@
 esp_toml_version = 1.0
 firmware_images_url = "https://cors-anywhere.ramrod.workers.dev/?url=https://github.com/CQUPTHXC/wireless-switching-power-meter/releases/download/v1.2.4/"
 supported_apps = ["Wireless_power_meter_pro","Wireless_power_meter","goodsbutton","stopbutton"]
-
+config_readme_url = "https://cors-anywhere.ramrod.workers.dev/?url=https://github.com/CQUPTHXC/wireless-switching-power-meter/blob/main/README.md"
 ["Wireless_power_meter_pro"]
 image.esp32c3 = "Wireless_power_meter_pro_4MB.bin"
+description = "pro版本功率计本体固件"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
 
 ["Wireless_power_meter"]
 image.esp32c3 = "Wireless_power_meter_4MB.bin"
+description = "普通版本功率计本体固件"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
 
 ["goodsbutton"]
 image.esp32c3 = "goodsbutton_4MB.bin"
+description = "远程控制小开关固件"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
 
 ["stopbutton"]
 image.esp32c3 = "stopbutton_4MB.bin"
+description = "远程控制无线金属急停固件"
 android_app_url = ""
 ios_app_url = ""
 chipsets = ["esp32c3"]
